@@ -45,15 +45,30 @@ export default function AdminLogin() {
       if (result?.error) {
         setError('Geçersiz kullanıcı adı veya şifre');
         setTimeout(() => setError(''), 5000);
-      } else {
+      } else if (result?.ok) {
+        // Session refresh için biraz bekle
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Force refresh session
         const session = await getSession();
         if (session) {
           router.push('/admin');
+          router.refresh(); // Force refresh
         } else {
-          setError('Oturum oluşturulamadı');
+          // Retry session check
+          setTimeout(async () => {
+            const retrySession = await getSession();
+            if (retrySession) {
+              router.push('/admin');
+              router.refresh();
+            } else {
+              setError('Oturum oluşturulamadı. Sayfayı yenileyin.');
+            }
+          }, 1000);
         }
       }
-    } catch {
+    } catch (err) {
+      console.error('Login error:', err);
       setError('Giriş işlemi sırasında hata oluştu');
       setTimeout(() => setError(''), 5000);
     } finally {
