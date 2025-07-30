@@ -1,0 +1,696 @@
+'use client';
+
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { Movie, MovieFormData } from '@/types/movie';
+import { movieService } from '@/lib/movieService';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import MovieForm from '@/components/MovieForm';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import HardDriveFilter from '@/components/HardDriveFilter';
+import { Pencil, Trash2, Plus, LogOut, Film, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+
+export default function AdminPanel() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const { toast } = useToast();
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortConfig, setSortConfig] = useState<{key: keyof Movie; direction: 'asc' | 'desc'} | null>(null);
+  const [selectedHardDrive, setSelectedHardDrive] = useState<string | undefined>();
+  const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(50);
+  const [totalMovies, setTotalMovies] = useState(0);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!session) {
+      router.push('/admin/login');
+      return;
+    }
+    loadMovies();
+  }, [session, status, router]);
+
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  const loadMovies = async () => {
+    try {
+      const data = await movieService.getAllMovies();
+      setMovies(data);
+    } catch (error) {
+      console.error('Failed to load movies:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterAndSortMovies = useCallback(async () => {
+    try {
+      setSearchLoading(true);
+      
+      const filterMovies = () => {
+        return new Promise<Movie[]>((resolve) => {
+          const processChunk = (startIndex: number, chunkSize: number = 1000) => {
+            const endIndex = Math.min(startIndex + chunkSize, movies.length);
+            const chunk = movies.slice(startIndex, endIndex);
+            
+            let filtered = chunk;
+
+            if (debouncedSearchQuery) {
+              const searchLower = debouncedSearchQuery.toLowerCase();
+              filtered = filtered.filter(movie => 
+                movie.title.toLowerCase().includes(searchLower) ||
+                movie.director.toLowerCase().includes(searchLower) ||
+                movie.hardDrive.toLowerCase().includes(searchLower)
+              );
+            }
+
+            if (selectedHardDrive) {
+              filtered = filtered.filter(movie => movie.hardDrive === selectedHardDrive);
+            }
+
+            return filtered;
+          };
+
+          const allFilteredChunks: Movie[] = [];
+          let currentIndex = 0;
+          
+          const processNextChunk = () => {
+            if (currentIndex >= movies.length) {
+              resolve(allFilteredChunks);
+              return;
+            }
+            
+            const chunk = processChunk(currentIndex);
+            allFilteredChunks.push(...chunk);
+            currentIndex += 1000;
+            
+            setTimeout(processNextChunk, 0);
+          };
+          
+          processNextChunk();
+        });
+      };
+
+      let filtered = await filterMovies();
+
+      if (sortConfig) {
+        filtered = [...filtered].sort((a, b) => {
+          const aValue = a[sortConfig.key];
+          const bValue = b[sortConfig.key];
+          
+          if (aValue == null && bValue == null) return 0;
+          if (aValue == null) return 1;
+          if (bValue == null) return -1;
+          
+          if (aValue < bValue) {
+            return sortConfig.direction === 'asc' ? -1 : 1;
+          }
+          if (aValue > bValue) {
+            return sortConfig.direction === 'asc' ? 1 : -1;
+          }
+          return 0;
+        });
+      }
+
+      setTotalMovies(filtered.length);
+      setFilteredMovies(filtered);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('Filtering error:', error);
+      setFilteredMovies(movies);
+      setTotalMovies(movies.length);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, [movies, debouncedSearchQuery, selectedHardDrive, sortConfig])
+
+  useEffect(() => {
+    filterAndSortMovies();
+  }, [movies, debouncedSearchQuery, selectedHardDrive, sortConfig, filterAndSortMovies]);
+
+  const handleSort = (key: keyof Movie) => {
+    setSortConfig(prevConfig => {
+      if (prevConfig?.key === key) {
+        if (prevConfig.direction === 'asc') {
+          return { key, direction: 'desc' };
+        } else {
+          return null;
+        }
+      }
+      return { key, direction: 'asc' };
+    });
+  };
+
+  const getSortIcon = (key: keyof Movie) => {
+    if (!sortConfig || sortConfig.key !== key) {
+      return (
+        <span className="inline-flex items-center ml-1 text-gray-400">
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+          </svg>
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center ml-1 text-blue-600">
+        {sortConfig.direction === 'asc' ? (
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+          </svg>
+        ) : (
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        )}
+      </span>
+    );
+  };
+
+  const handleCreateMovie = async (data: MovieFormData) => {
+    try {
+      await movieService.createMovie({
+        title: data.title,
+        year: parseInt(data.year),
+        director: data.director,
+        hardDrive: data.hardDrive,
+        videoQuality: data.videoQuality,
+        audioQuality: data.audioQuality,
+        hasSubtitles: data.hasSubtitles,
+        movieLink: data.movieLink,
+        directorLink: data.directorLink,
+      });
+      setIsFormOpen(false);
+      loadMovies();
+      toast({
+        title: "Movie added",
+        description: "The movie has been successfully added to the catalog.",
+      });
+    } catch (error: unknown) {
+      console.error('Failed to create movie:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: `Failed to add movie: ${(error as Error)?.message || 'Unknown error'}`,
+      });
+    }
+  };
+
+  const handleUpdateMovie = async (data: MovieFormData) => {
+    if (!selectedMovie?.id) return;
+    
+    try {
+      await movieService.updateMovie(selectedMovie.id, {
+        title: data.title,
+        year: parseInt(data.year),
+        director: data.director,
+        hardDrive: data.hardDrive,
+        videoQuality: data.videoQuality,
+        audioQuality: data.audioQuality,
+        hasSubtitles: data.hasSubtitles,
+        movieLink: data.movieLink,
+        directorLink: data.directorLink,
+      });
+      setIsFormOpen(false);
+      setSelectedMovie(null);
+      loadMovies();
+      toast({
+        title: "Movie updated",
+        description: "The movie has been successfully updated.",
+      });
+    } catch (error: unknown) {
+      console.error('Failed to update movie:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: `Failed to update movie: ${(error as Error)?.message || 'Unknown error'}`,
+      });
+    }
+  };
+
+  const handleDeleteMovie = async (id: string) => {
+    try {
+      await movieService.deleteMovie(id);
+      loadMovies();
+      toast({
+        title: "Movie deleted",
+        description: "The movie has been successfully deleted from the catalog.",
+      });
+    } catch (error: unknown) {
+      console.error('Failed to delete movie:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: `Failed to delete movie: ${(error as Error)?.message || 'Unknown error'}`,
+      });
+    }
+  };
+
+  const openEditForm = (movie: Movie) => {
+    setSelectedMovie(movie);
+    setIsFormOpen(true);
+  };
+
+  const openCreateForm = () => {
+    setSelectedMovie(null);
+    setIsFormOpen(true);
+  };
+
+  const closeForm = () => {
+    setIsFormOpen(false);
+    setSelectedMovie(null);
+  };
+
+  const paginatedMovies = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredMovies.slice(startIndex, endIndex);
+  }, [filteredMovies, currentPage, itemsPerPage]);
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(totalMovies / itemsPerPage);
+  }, [totalMovies, itemsPerPage]);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  if (status === 'loading' || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-6">
+          <div className="relative">
+            <Film className="h-12 w-12 animate-pulse mx-auto text-[#ff6b6b]" />
+            <div className="absolute inset-0 h-12 w-12 mx-auto border-4 border-[#feca57] border-t-transparent rounded-full animate-spin" style={{animationDirection: 'reverse', animationDuration: '1s'}}></div>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold gradient-text">Admin paneli yükleniyor...</h2>
+            <p className="text-muted-foreground">🎬 Kontrol odası hazırlanıyor...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen">
+      <div className="container mx-auto py-8 px-4">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 lg:mb-12 gap-4">
+          <div className="space-y-2 lg:space-y-4">
+            <h1 className="text-xl sm:text-2xl lg:text-5xl font-bold flex items-center gap-2 lg:gap-4 pb-2">
+              <div className="relative">
+                <Film className="h-5 w-5 sm:h-6 sm:w-6 lg:h-10 lg:w-10 text-[#ff6b6b] drop-shadow-lg" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-[#feca57] rounded-full animate-ping"></div>
+              </div>
+              <span className="gradient-text">CineCatalog</span>
+              <span className="text-sm sm:text-lg lg:text-2xl text-muted-foreground">Admin</span>
+            </h1>
+            <p className="text-sm sm:text-base lg:text-lg text-muted-foreground">🎛️ Film imparatorluğunuzu yönetin</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            <ThemeToggle />
+            <div className="flex gap-2 flex-1 lg:flex-none">
+              <Button onClick={() => router.push('/')} className="btn-secondary gap-1 px-2 sm:px-3 lg:px-4 py-2 rounded-full text-xs sm:text-sm">
+                <Film className="w-3 h-3 lg:w-4 lg:h-4" />
+                <span className="hidden sm:inline">Ana Sayfa</span>
+                <span className="sm:hidden">Ana</span>
+              </Button>
+              <Button onClick={() => signOut()} className="btn-outline gap-1 px-2 sm:px-3 lg:px-4 py-2 rounded-full hover:bg-red-500/20 hover:text-red-400 hover:border-red-400 text-xs sm:text-sm">
+                <LogOut className="w-3 h-3 lg:w-4 lg:h-4" />
+                <span className="hidden sm:inline">Çıkış</span>
+                <span className="sm:hidden">Çık</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="search-card border-0 p-4 lg:p-6 mb-6 lg:mb-10 rounded-xl">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
+              <div className="w-full">
+                <div className="relative">
+                  <Film className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#feca57]" />
+                  <Input
+                    placeholder="Film, yönetmen veya harddisk ara..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-10 bg-white/10 border-white/20 focus:border-[#feca57] focus:ring-1 focus:ring-[#feca57] text-sm"
+                    disabled={searchLoading}
+                  />
+                  {searchLoading && (
+                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#feca57] animate-spin" />
+                  )}
+                </div>
+              </div>
+              <div className="w-full">
+                <HardDriveFilter
+                  hardDrives={Array.from(new Set(movies.map(m => m.hardDrive))).sort()}
+                  selectedHardDrive={selectedHardDrive}
+                  onSelect={setSelectedHardDrive}
+                />
+              </div>
+            </div>
+            <div className="flex justify-center sm:justify-end">
+              <Button onClick={openCreateForm} className="btn-primary gap-2 px-4 sm:px-6 py-2 rounded-full text-sm w-full sm:w-auto">
+                <Plus className="w-4 h-4" />
+                Film Ekle
+              </Button>
+            </div>
+          </div>
+          
+        </div>
+
+        {/* Top Pagination */}
+        {totalPages > 1 && (
+          <div className="flex flex-col gap-3 mb-4 px-2 sm:px-4">
+            <div className="text-xs sm:text-sm text-muted-foreground text-center">
+              Sayfa {currentPage} / {totalPages} - Toplam {totalMovies} film
+            </div>
+            <div className="flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(1)}
+                disabled={currentPage === 1}
+                className="btn-outline gap-1 text-xs px-2 sm:px-3"
+              >
+                <span className="hidden sm:inline">⏮️ İlk</span>
+                <span className="sm:hidden">⏮️</span>
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="btn-outline gap-1 text-xs px-2 sm:px-3"
+              >
+                <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Önceki</span>
+              </Button>
+              
+              {/* Page numbers - show fewer on mobile */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                  let pageNum;
+                  const maxPages = 3;
+                  if (totalPages <= maxPages) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= Math.floor(maxPages/2) + 1) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - Math.floor(maxPages/2)) {
+                    pageNum = totalPages - maxPages + 1 + i;
+                  } else {
+                    pageNum = currentPage - Math.floor(maxPages/2) + i;
+                  }
+                  
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`${currentPage === pageNum ? "btn-primary" : "btn-outline"} text-xs px-2 sm:px-3 min-w-[32px] sm:min-w-[36px]`}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="btn-outline gap-1 text-xs px-2 sm:px-3"
+              >
+                <span className="hidden sm:inline">Sonraki</span>
+                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(totalPages)}
+                disabled={currentPage === totalPages}
+                className="btn-outline gap-1 text-xs px-2 sm:px-3"
+              >
+                <span className="hidden sm:inline">Son ⏭️</span>
+                <span className="sm:hidden">⏭️</span>
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <div 
+          id="table-container"
+          className="movie-card border-0 rounded-xl overflow-x-auto"
+        >
+          <Table className="min-w-[800px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort('title')}
+                >
+                  Film {getSortIcon('title')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort('year')}
+                >
+                  Yıl {getSortIcon('year')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort('director')}
+                >
+                  Yönetmen {getSortIcon('director')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort('hardDrive')}
+                >
+                  Harddisk {getSortIcon('hardDrive')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort('videoQuality')}
+                >
+                  Görüntü Kalitesi {getSortIcon('videoQuality')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort('audioQuality')}
+                >
+                  Ses Kalitesi {getSortIcon('audioQuality')}
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort('hasSubtitles')}
+                >
+                  Altyazı {getSortIcon('hasSubtitles')}
+                </TableHead>
+                <TableHead className="text-right">İşlemler</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedMovies.map((movie) => (
+                <TableRow key={movie.id}>
+                  <TableCell className="font-medium">
+                    {movie.movieLink && movie.movieLink.trim() ? (
+                      <a 
+                        href={movie.movieLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-[#ff6b6b] hover:text-[#ff6b6b]/80 underline decoration-1 underline-offset-2 transition-colors cursor-pointer"
+                      >
+                        {movie.title}
+                      </a>
+                    ) : (
+                      movie.title
+                    )}
+                  </TableCell>
+                  <TableCell>{movie.year}</TableCell>
+                  <TableCell>
+                    {movie.directorLink ? (
+                      <a 
+                        href={movie.directorLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-[#ff6b6b] hover:text-[#ff6b6b]/80 underline decoration-1 underline-offset-2 transition-colors"
+                      >
+                        {movie.director}
+                      </a>
+                    ) : (
+                      movie.director
+                    )}
+                  </TableCell>
+                  <TableCell>{movie.hardDrive}</TableCell>
+                  <TableCell>{movie.videoQuality}</TableCell>
+                  <TableCell>{movie.audioQuality}</TableCell>
+                  <TableCell>{movie.hasSubtitles ? '✓' : '✗'}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1 sm:gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openEditForm(movie)}
+                        className="h-8 w-8 p-0 sm:h-9 sm:w-9"
+                      >
+                        <Pencil className="w-3 h-3 sm:w-4 sm:h-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="outline" className="h-8 w-8 p-0 sm:h-9 sm:w-9">
+                            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="bg-card border-border">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="text-foreground">Filmi Sil</AlertDialogTitle>
+                            <AlertDialogDescription className="text-muted-foreground">
+                              &quot;{movie.title}&quot; filmini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="bg-card border-border text-foreground hover:bg-accent">İptal</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-red-500 hover:bg-red-600 text-white border-red-500"
+                              onClick={() => movie.id && handleDeleteMovie(movie.id)}
+                            >
+                              Sil
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 px-4">
+            <div className="text-sm text-muted-foreground">
+              Toplam {totalMovies} filmden {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalMovies)} arası gösteriliyor
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(1)}
+                disabled={currentPage === 1}
+                className="btn-outline gap-1"
+              >
+                ⏮️ İlk
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="btn-outline"
+              >
+                Önceki
+              </Button>
+              
+              {/* Page numbers */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handlePageChange(pageNum)}
+                      className={currentPage === pageNum ? "btn-primary" : "btn-outline"}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="btn-outline"
+              >
+                Sonraki
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(totalPages)}
+                disabled={currentPage === totalPages}
+                className="btn-outline gap-1"
+              >
+                Son ⏭️
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {paginatedMovies.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-lg text-muted-foreground">
+              {totalMovies === 0 ? "Film bulunamadı." : "Bu sayfada film yok."}
+            </p>
+          </div>
+        )}
+
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogContent className="max-w-2xl p-0 bg-transparent border-0 shadow-none" showCloseButton={false}>
+            <DialogHeader className="hidden">
+              <DialogTitle>
+                {selectedMovie ? 'Filmi Düzenle' : 'Yeni Film Ekle'}
+              </DialogTitle>
+            </DialogHeader>
+            <MovieForm
+              movie={selectedMovie || undefined}
+              onSubmit={selectedMovie ? handleUpdateMovie : handleCreateMovie}
+              onCancel={closeForm}
+              title={selectedMovie ? 'Filmi Düzenle' : 'Yeni Film Ekle'}
+              existingHardDrives={Array.from(new Set(movies.map(m => m.hardDrive))).sort()}
+            />
+          </DialogContent>
+        </Dialog>
+
+      </div>
+    </div>
+  );
+}
