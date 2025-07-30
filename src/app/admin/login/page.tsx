@@ -141,7 +141,7 @@ export default function AdminLogin() {
               <p className="text-sm text-destructive">{error}</p>
             )}
             <Button type="submit" className="w-full btn-primary py-3 text-lg rounded-full" disabled={loading}>
-              {loading ? '🎬 Giriş yapılıyor...' : '🚀 Yöneticiye Giriş'}
+              {loading ? '🎬 Giriş yapılıyor...' : '🚀 Admin Paneline Giriş'}
             </Button>
           </form>
         </CardContent>
