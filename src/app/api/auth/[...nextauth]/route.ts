@@ -1,8 +1,27 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { validateAdminCredentials, hashWithSHA256 } from '@/lib/auth';
+import type { NextRequest } from 'next/server';
 
-const handler = NextAuth({
+// Dynamic URL based on request headers
+function getAuthUrl(req: NextRequest) {
+  const host = req.headers.get('host');
+  const protocol = req.headers.get('x-forwarded-proto') || 'https';
+  
+  // Custom domain'leri destekle
+  if (host?.includes('cinecatalog.com')) {
+    return `${protocol}://${host}`;
+  }
+  
+  // Fallback to default
+  return process.env.NEXTAUTH_URL || `${protocol}://${host}`;
+}
+
+async function handler(req: NextRequest) {
+  // Set dynamic URL for NextAuth
+  process.env.NEXTAUTH_URL = getAuthUrl(req);
+  
+  return NextAuth({
     providers: [
       CredentialsProvider({
         name: 'credentials',
@@ -69,6 +88,7 @@ const handler = NextAuth({
     },
     secret: process.env.NEXTAUTH_SECRET,
     debug: process.env.NODE_ENV === 'development',
-});
+  })(req);
+}
 
 export { handler as GET, handler as POST };
