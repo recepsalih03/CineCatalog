@@ -1,6 +1,6 @@
 // route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { movieService } from '@/lib/movieService';
+import { movieServiceAdmin } from '@/lib/movieServiceAdmin';
 import { Movie } from '@/types/movie';
 
 const clean = (val?: string): string =>
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
             };
 
             try {
-              const movieId = await movieService.createMovie(movieToCreate);
+              const movieId = await movieServiceAdmin.createMovie(movieToCreate);
               results.push({ index: actualIndex, id: movieId, title: movieToCreate.title, success: true });
             } catch {
               errors.push({ index: actualIndex, error: 'Database error', data: movieData });
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
         directorLink,
       };
 
-      const movieId = await movieService.createMovie(movieToCreate);
+      const movieId = await movieServiceAdmin.createMovie(movieToCreate);
 
       return NextResponse.json({
         success: true,
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const movies = await movieService.getAllMovies();
+    const movies = await movieServiceAdmin.getAllMovies();
     return NextResponse.json({ success: true, data: movies });
   } catch {
     return NextResponse.json({ error: 'Filmler yüklenirken hata oluştu', success: false }, { status: 500 });

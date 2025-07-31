@@ -221,7 +221,20 @@ export default function AdminPanel() {
         throw new Error(validation.errors.join(', '));
       }
 
-      await movieService.createMovie(movieData, userId, session.user.email || undefined);
+      // Admin API kullanarak film ekleme
+      const response = await fetch('/api/admin/movies', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(movieData),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Film eklenirken hata oluştu');
+      }
       setIsFormOpen(false);
       loadMovies();
       toast({
@@ -242,8 +255,9 @@ export default function AdminPanel() {
     if (!selectedMovie?.id) return;
     
     try {
-      const userId = session?.user?.id || session?.user?.email || 'anonymous';
-      await movieService.updateMovie(selectedMovie.id, {
+      // Admin API kullanarak film güncelleme
+      const updateData = {
+        id: selectedMovie.id,
         title: data.title,
         year: parseInt(data.year),
         director: data.director,
@@ -253,7 +267,21 @@ export default function AdminPanel() {
         hasSubtitles: data.hasSubtitles,
         movieLink: data.movieLink,
         directorLink: data.directorLink,
-      }, userId, session?.user?.email || undefined);
+      };
+
+      const response = await fetch('/api/admin/movies', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Film güncellenirken hata oluştu');
+      }
       setIsFormOpen(false);
       setSelectedMovie(null);
       loadMovies();
@@ -273,8 +301,16 @@ export default function AdminPanel() {
 
   const handleDeleteMovie = async (id: string) => {
     try {
-      const userId = session?.user?.id || session?.user?.email || 'anonymous';
-      await movieService.deleteMovie(id, userId, session?.user?.email || undefined);
+      // Admin API kullanarak film silme
+      const response = await fetch(`/api/admin/movies?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Film silinirken hata oluştu');
+      }
       loadMovies();
       toast({
         title: "Film silindi",
