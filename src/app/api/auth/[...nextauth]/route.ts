@@ -2,20 +2,7 @@ import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { validateAdminCredentials, hashWithSHA256 } from '@/lib/auth';
 
-// Dynamic URL detection for multiple domains
-const getBaseUrl = (req?: Request) => {
-  if (req) {
-    const host = req.headers.get('host');
-    const protocol = req.headers.get('x-forwarded-proto') || 'https';
-    return `${protocol}://${host}`;
-  }
-  return process.env.NEXTAUTH_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
-};
-
-
-// Dynamic handler with custom baseUrl
-const authHandler = (req: Request) => {
-  return NextAuth({
+const handler = NextAuth({
     providers: [
       CredentialsProvider({
         name: 'credentials',
@@ -82,9 +69,6 @@ const authHandler = (req: Request) => {
     },
     secret: process.env.NEXTAUTH_SECRET,
     debug: process.env.NODE_ENV === 'development',
-    // Dynamic URL based on request
-    trustHost: true,
-  })(req);
-};
+});
 
-export { authHandler as GET, authHandler as POST };
+export { handler as GET, handler as POST };
