@@ -1,4 +1,6 @@
-import { Suspense } from "react"
+"use client"
+
+import { Suspense, useEffect, useState, useCallback } from "react"
 import { movieService } from "@/lib/movieService"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -7,23 +9,78 @@ import { Film, Settings, HardDrive } from "lucide-react"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import MovieGrid from "@/components/MovieGrid"
 import SearchAndFilters from "@/components/SearchAndFilters"
+import type { Movie } from "@/types/movie"
 
-async function getMoviesData() {
-  try {
-    const [movies, hardDrives] = await Promise.all([
-      movieService.getAllMovies(),
-      movieService.getUniqueHardDrives()
-    ])
-    return { movies, hardDrives }
-  } catch (error) {
-    console.error("Failed to load movies:", error)
-    return { movies: [], hardDrives: [] }
+export default function Home() {
+  const [movies, setMovies] = useState<Movie[]>([])
+  const [hardDrives, setHardDrives] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const loadMoviesData = useCallback(async () => {
+    try {
+      setLoading(true)
+      const [moviesData, hardDrivesData] = await Promise.all([
+        movieService.getAllMovies(),
+        movieService.getUniqueHardDrives()
+      ])
+      setMovies(moviesData)
+      setHardDrives(hardDrivesData)
+    } catch (error) {
+      console.error("Failed to load movies:", error)
+      setMovies([])
+      setHardDrives([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadMoviesData()
+  }, [loadMoviesData])
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout
+
+    const startPolling = () => {
+      intervalId = setInterval(() => {
+        loadMoviesData()
+      }, 30000) // Her 30 saniyede bir kontrol et
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadMoviesData()
+        startPolling()
+      } else {
+        clearInterval(intervalId)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    startPolling()
+
+    return () => {
+      clearInterval(intervalId)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [loadMoviesData])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-6">
+          <div className="relative">
+            <Film className="h-12 w-12 animate-pulse mx-auto text-[#ff6b6b]" />
+            <div className="absolute inset-0 h-12 w-12 mx-auto border-4 border-[#feca57] border-t-transparent rounded-full animate-spin" style={{animationDirection: 'reverse', animationDuration: '1s'}}></div>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold gradient-text">Katalog yükleniyor...</h2>
+            <p className="text-muted-foreground">🎬 Film koleksiyonunuz hazırlanıyor...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
-}
-
-
-export default async function Home() {
-  const { movies, hardDrives } = await getMoviesData()
 
   return (
     <div className="min-h-screen">

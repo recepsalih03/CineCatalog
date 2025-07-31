@@ -90,7 +90,7 @@ export const movieService = {
     }
   },
 
-  async createMovie(movieData: Omit<Movie, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+  async createMovie(movieData: Omit<Movie, 'id' | 'createdAt' | 'updatedAt'>, userId?: string, userEmail?: string): Promise<string> {
     try {
       const now = Timestamp.now();
       const docRef = await addDoc(collection(db, COLLECTION_NAME), {
@@ -98,6 +98,12 @@ export const movieService = {
         createdAt: now,
         updatedAt: now,
       });
+      
+      if (userId) {
+        const { auditLogger } = await import('./auditLogger');
+        await auditLogger.logMovieCreate(userId, docRef.id, movieData, userEmail);
+      }
+      
       return docRef.id;
     } catch (error) {
       console.error('Error creating movie:', error);
@@ -105,23 +111,42 @@ export const movieService = {
     }
   },
 
-  async updateMovie(id: string, movieData: Partial<Movie>): Promise<void> {
+  async updateMovie(id: string, movieData: Partial<Movie>, userId?: string, userEmail?: string): Promise<void> {
     try {
       const movieRef = doc(db, COLLECTION_NAME, id);
       await updateDoc(movieRef, {
         ...movieData,
         updatedAt: Timestamp.now(),
       });
+      
+      if (userId) {
+        const { auditLogger } = await import('./auditLogger');
+        await auditLogger.logMovieUpdate(userId, id, movieData, userEmail);
+      }
     } catch (error) {
       console.error('Error updating movie:', error);
       throw error;
     }
   },
 
-  async deleteMovie(id: string): Promise<void> {
+  async deleteMovie(id: string, userId?: string, userEmail?: string): Promise<void> {
     try {
       const movieRef = doc(db, COLLECTION_NAME, id);
+      
+      let movieTitle = 'Unknown';
+      if (userId) {
+        const movieDoc = await getDoc(movieRef);
+        if (movieDoc.exists()) {
+          movieTitle = movieDoc.data().title || 'Unknown';
+        }
+      }
+      
       await deleteDoc(movieRef);
+      
+      if (userId) {
+        const { auditLogger } = await import('./auditLogger');
+        await auditLogger.logMovieDelete(userId, id, movieTitle, userEmail);
+      }
     } catch (error: unknown) {
       console.error('Error deleting movie:', error);
       const err = error as { code?: string; message?: string };
