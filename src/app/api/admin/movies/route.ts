@@ -11,12 +11,6 @@ function isValidAdmin(session: { user?: { name?: string | null } } | null): bool
   const adminUsername = process.env.ADMIN_USERNAME || '';
   const isValid = session.user.name.toLowerCase() === adminUsername.toLowerCase();
   
-  console.log('🔐 Admin validation:', {
-    sessionUserName: session.user.name,
-    adminUsername,
-    isValid
-  });
-  
   return isValid;
 }
 
@@ -81,6 +75,7 @@ export async function POST(request: NextRequest) {
       videoQuality: (body.videoQuality || '').trim(),
       audioQuality: (body.audioQuality || '').trim(),
       hasSubtitles: body.hasSubtitles || false,
+      watched: body.watched || false,
       movieLink: (body.movieLink || '').trim(),
       directorLink: (body.directorLink || '').trim(),
     };
@@ -135,6 +130,49 @@ export async function PUT(request: NextRequest) {
     console.error('Movie update error:', error);
     return NextResponse.json({ 
       error: 'Film güncellenirken hata oluştu', 
+      success: false 
+    }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getServerSession();
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    if (!isValidAdmin(session)) {
+      return NextResponse.json({ error: 'Çıkış yapıp tekrar giriş yapın.' }, { status: 403 });
+    }
+    
+    const identifier = session.user.name || 'unknown';
+    if (!checkRateLimit(identifier)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
+    const body = await request.json();
+    const { id, watched } = body;
+    
+    if (!id) {
+      return NextResponse.json({ error: 'Movie ID required' }, { status: 400 });
+    }
+
+    if (typeof watched !== 'boolean') {
+      return NextResponse.json({ error: 'Invalid watched value' }, { status: 400 });
+    }
+
+    await movieServiceAdmin.updateMovieWatchedStatus(id, watched);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Film durumu başarıyla güncellendi'
+    });
+  } catch (error) {
+    console.error('Movie watched status update error:', error);
+    return NextResponse.json({ 
+      error: 'Film durumu güncellenirken hata oluştu', 
       success: false 
     }, { status: 500 });
   }

@@ -231,6 +231,19 @@ export const movieService = {
     }
   },
 
+  async updateMovieWatchedStatus(id: string, watched: boolean): Promise<void> {
+    try {
+      const movieRef = doc(db, COLLECTION_NAME, id);
+      await updateDoc(movieRef, {
+        watched,
+        updatedAt: Timestamp.now(),
+      });
+    } catch (error) {
+      console.error('Error updating movie watched status:', error);
+      throw error;
+    }
+  },
+
   async getUniqueHardDrives(): Promise<string[]> {
     try {
       const moviesCollection = collection(db, COLLECTION_NAME);

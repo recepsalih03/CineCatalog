@@ -7,6 +7,7 @@ export interface Movie {
   videoQuality: string;
   audioQuality: string;
   hasSubtitles: boolean;
+  watched?: boolean;
   movieLink?: string;
   directorLink?: string;
   createdAt?: Date;
@@ -21,6 +22,7 @@ export interface MovieFormData {
   videoQuality: string;
   audioQuality: string;
   hasSubtitles: boolean;
+  watched?: boolean;
   movieLink: string;
   directorLink: string;
 }

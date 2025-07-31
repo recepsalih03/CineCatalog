@@ -5,7 +5,7 @@ import { memo } from "react"
 import type { Movie } from "@/types/movie"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { Film, HardDrive, User, Volume2, Subtitles } from "lucide-react"
+import { Film, HardDrive, User, Volume2, Subtitles, Eye, EyeOff } from "lucide-react"
 
 interface MovieCardProps {
   movie: Movie
@@ -13,10 +13,24 @@ interface MovieCardProps {
 
 const MovieCard = memo(function MovieCard({ movie }: MovieCardProps) {
   return (
-    <Card className="movie-card border-0 h-full">
-      <CardContent className="p-3 h-full flex flex-col">
+    <Card className={`movie-card border-0 h-full relative overflow-hidden ${movie.watched ? 'ring-1 ring-green-400/30' : ''}`}>
+      {movie.watched && (
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-emerald-500/5 pointer-events-none" />
+      )}
+      <CardContent className="p-3 h-full flex flex-col relative z-10">
         <div className="flex items-start justify-between mb-2">
-          <Film className="h-4 w-4 text-[#ff6b6b]" />
+          <div className="flex items-center gap-2">
+            <Film className="h-4 w-4 text-[#ff6b6b]" />
+            {movie.watched && (
+              <Badge 
+                variant="outline"
+                className="text-xs bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border-green-400/30 px-2 py-1 animate-pulse shadow-sm"
+              >
+                <Eye className="h-3 w-3 mr-1" />
+                İzlendi
+              </Badge>
+            )}
+          </div>
           <Badge 
             variant="secondary" 
             className="text-xs bg-[#ff6b6b]/20 text-[#ff6b6b] border-[#ff6b6b]/30"

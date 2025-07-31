@@ -29,6 +29,7 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
     videoQuality: movie?.videoQuality || "",
     audioQuality: movie?.audioQuality || "",
     hasSubtitles: movie?.hasSubtitles || false,
+    watched: movie?.watched || false,
     movieLink: movie?.movieLink || "",
     directorLink: movie?.directorLink || "",
   })
@@ -396,17 +397,32 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
               </div>
             </div>
 
-            <div className="flex items-center space-x-3 p-3 border border-white/20 rounded-lg bg-white/5">
-              <Checkbox
-                id="hasSubtitles"
-                checked={formData.hasSubtitles}
-                onCheckedChange={(checked) => handleChange("hasSubtitles", checked as boolean)}
-                className="border-2 border-[#feca57]/50 data-[state=checked]:bg-[#feca57] data-[state=checked]:border-[#feca57] data-[state=checked]:text-white"
-              />
-              <Label htmlFor="hasSubtitles" className="flex items-center gap-2 cursor-pointer text-foreground font-medium text-sm">
-                <Subtitles className="h-3 w-3 sm:h-4 sm:w-4 text-[#feca57]" />
-                Altyazı Mevcut
-              </Label>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3 p-3 border border-white/20 rounded-lg bg-white/5">
+                <Checkbox
+                  id="hasSubtitles"
+                  checked={formData.hasSubtitles}
+                  onCheckedChange={(checked) => handleChange("hasSubtitles", checked as boolean)}
+                  className="border-2 border-[#feca57]/50 data-[state=checked]:bg-[#feca57] data-[state=checked]:border-[#feca57] data-[state=checked]:text-white"
+                />
+                <Label htmlFor="hasSubtitles" className="flex items-center gap-2 cursor-pointer text-foreground font-medium text-sm">
+                  <Subtitles className="h-3 w-3 sm:h-4 sm:w-4 text-[#feca57]" />
+                  Altyazı Mevcut
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-3 p-3 border border-white/20 rounded-lg bg-white/5">
+                <Checkbox
+                  id="watched"
+                  checked={formData.watched}
+                  onCheckedChange={(checked) => handleChange("watched", checked as boolean)}
+                  className="border-2 border-[#ff6b6b]/50 data-[state=checked]:bg-[#ff6b6b] data-[state=checked]:border-[#ff6b6b] data-[state=checked]:text-white"
+                />
+                <Label htmlFor="watched" className="flex items-center gap-2 cursor-pointer text-foreground font-medium text-sm">
+                  <Film className="h-3 w-3 sm:h-4 sm:w-4 text-[#ff6b6b]" />
+                  Bu filmi izledim
+                </Label>
+              </div>
             </div>
           </div>
 

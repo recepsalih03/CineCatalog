@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import MovieForm from '@/components/MovieForm';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import HardDriveFilter from '@/components/HardDriveFilter';
-import { Pencil, Trash2, Plus, LogOut, Film, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Pencil, Trash2, Plus, LogOut, Film, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
 
 export default function AdminPanel() {
   const { data: session, status } = useSession();
@@ -194,6 +194,7 @@ export default function AdminPanel() {
         videoQuality: data.videoQuality,
         audioQuality: data.audioQuality,
         hasSubtitles: data.hasSubtitles,
+        watched: data.watched || false,
         movieLink: data.movieLink ? data.movieLink.trim() : '',
         directorLink: data.directorLink ? data.directorLink.trim() : '',
       };
@@ -240,6 +241,7 @@ export default function AdminPanel() {
         videoQuality: data.videoQuality,
         audioQuality: data.audioQuality,
         hasSubtitles: data.hasSubtitles,
+        watched: data.watched || false,
         movieLink: data.movieLink,
         directorLink: data.directorLink,
       };
@@ -296,6 +298,30 @@ export default function AdminPanel() {
         variant: "destructive",
         title: "Hata",
         description: `Film silinirken hata oluştu: ${(error as Error)?.message || 'Bilinmeyen hata'}`,
+      });
+    }
+  };
+
+  const handleWatchedToggle = async (id: string, watched: boolean) => {
+    try {
+      await movieService.updateMovieWatchedStatus(id, watched);
+      
+      setMovies(prevMovies => 
+        prevMovies.map(movie => 
+          movie.id === id ? { ...movie, watched } : movie
+        )
+      );
+      
+      toast({
+        title: watched ? "Film izlendi olarak işaretlendi" : "Film izlenmedi olarak işaretlendi",
+        description: "Film durumu başarıyla güncellendi.",
+      });
+    } catch (error: unknown) {
+      console.error('Film durumu güncellenirken hata oluştu:', error);
+      toast({
+        variant: "destructive",
+        title: "Hata",
+        description: `Film durumu güncellenirken hata oluştu: ${(error as Error)?.message || 'Bilinmeyen hata'}`,
       });
     }
   };
@@ -501,6 +527,7 @@ export default function AdminPanel() {
           <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12">İzlendi</TableHead>
                 <TableHead 
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() => handleSort('title')}
@@ -549,6 +576,23 @@ export default function AdminPanel() {
             <TableBody>
               {paginatedMovies.map((movie) => (
                 <TableRow key={movie.id}>
+                  <TableCell className="text-center">
+                    <button
+                      onClick={() => handleWatchedToggle(movie.id!, !movie.watched)}
+                      className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 hover:scale-110 ${
+                        movie.watched 
+                          ? 'bg-green-500/20 hover:bg-green-500/30 text-green-400' 
+                          : 'bg-gray-500/20 hover:bg-gray-500/30 text-gray-400'
+                      }`}
+                      title={movie.watched ? 'İzlendi - İzlenmedi olarak işaretle' : 'İzlenmedi - İzlendi olarak işaretle'}
+                    >
+                      {movie.watched ? (
+                        <Eye className="w-4 h-4" />
+                      ) : (
+                        <EyeOff className="w-4 h-4" />
+                      )}
+                    </button>
+                  </TableCell>
                   <TableCell className="font-medium">
                     {movie.movieLink && movie.movieLink.trim() ? (
                       <a 

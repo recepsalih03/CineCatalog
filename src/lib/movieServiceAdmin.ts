@@ -57,6 +57,19 @@ export const movieServiceAdmin = {
     }
   },
 
+  async updateMovieWatchedStatus(id: string, watched: boolean): Promise<void> {
+    try {
+      const now = new Date();
+      await db.collection(COLLECTION_NAME).doc(id).update({
+        watched,
+        updatedAt: now,
+      });
+    } catch (error) {
+      console.error('❌ Admin: Error updating movie watched status:', error);
+      throw error;
+    }
+  },
+
   async getUniqueHardDrives(): Promise<string[]> {
     try {
       const snapshot = await db.collection(COLLECTION_NAME).get();
