@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { movieServiceAdmin } from '@/lib/movieServiceAdmin';
 import { getServerSession } from 'next-auth';
-import { Movie } from '@/types/movie';
 
 // Admin user validation
-function isValidAdmin(session: any): boolean {
+function isValidAdmin(session: { user?: { name?: string | null } } | null): boolean {
   return session?.user?.name === 'kadirkilinc';
 }
 
