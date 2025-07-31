@@ -196,15 +196,15 @@ export default function AdminPanel() {
       setIsFormOpen(false);
       loadMovies();
       toast({
-        title: "Movie added",
-        description: "The movie has been successfully added to the catalog.",
+        title: "Film eklendi",
+        description: "Film başarıyla arşive eklendi.",
       });
     } catch (error: unknown) {
-      console.error('Failed to create movie:', error);
+      console.error('Film eklenirken hata oluştu:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: `Failed to add movie: ${(error as Error)?.message || 'Unknown error'}`,
+        title: "Hata",
+        description: `Film eklenirken hata oluştu: ${(error as Error)?.message || 'Bilinmeyen hata'}`,
       });
     }
   };
@@ -228,15 +228,15 @@ export default function AdminPanel() {
       setSelectedMovie(null);
       loadMovies();
       toast({
-        title: "Movie updated",
-        description: "The movie has been successfully updated.",
+        title: "Film güncellendi",
+        description: "Film başarıyla güncellendi.",
       });
     } catch (error: unknown) {
-      console.error('Failed to update movie:', error);
+      console.error('Film güncellenirken hata oluştu:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: `Failed to update movie: ${(error as Error)?.message || 'Unknown error'}`,
+        title: "Hata",
+        description: `Film güncellenirken hata oluştu: ${(error as Error)?.message || 'Bilinmeyen hata'}`,
       });
     }
   };
@@ -246,15 +246,15 @@ export default function AdminPanel() {
       await movieService.deleteMovie(id);
       loadMovies();
       toast({
-        title: "Movie deleted",
-        description: "The movie has been successfully deleted from the catalog.",
+        title: "Film silindi",
+        description: "Film başarıyla arşivden silindi.",
       });
     } catch (error: unknown) {
-      console.error('Failed to delete movie:', error);
+      console.error('Film silinirken hata oluştu:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: `Failed to delete movie: ${(error as Error)?.message || 'Unknown error'}`,
+        title: "Hata",
+        description: `Film silinirken hata oluştu: ${(error as Error)?.message || 'Bilinmeyen hata'}`,
       });
     }
   };
@@ -289,7 +289,6 @@ export default function AdminPanel() {
     setCurrentPage(page);
     
     if (maintainScroll) {
-      // Scroll pozisyonunu korumak için bir sonraki render'da scroll'u geri yükle
       setTimeout(() => {
         window.scrollTo({ top: currentScrollY, behavior: 'instant' });
       }, 0);
