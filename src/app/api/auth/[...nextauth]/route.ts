@@ -24,8 +24,8 @@ const handler = NextAuth({
             const secureUserId = hashWithSHA256(`admin-${Date.now()}`);
             return {
               id: secureUserId,
-              name: credentials.username, // Gerçek kullanıcı adını döndür
-              email: 'kadirkilinc@moviecatalog.com',
+              name: credentials.username,
+              email: '',
             };
           }
 
@@ -58,7 +58,7 @@ const handler = NextAuth({
     },
     session: {
       strategy: 'jwt',
-      maxAge: 24 * 60 * 60, // 24 hours
+      maxAge: 24 * 60 * 60,
     },
     cookies: {
   sessionToken: {

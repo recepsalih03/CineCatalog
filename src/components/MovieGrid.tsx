@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import type { Movie } from "@/types/movie"
 import MovieCard from "@/components/MovieCard"
 import { Button } from "@/components/ui/button"
@@ -13,7 +13,11 @@ interface MovieGridProps {
 
 export default function MovieGrid({ initialMovies }: MovieGridProps) {
   const searchParams = useSearchParams()
-  const [currentPage, setCurrentPage] = useState(1)
+  const router = useRouter()
+  const [currentPage, setCurrentPage] = useState(() => {
+    const pageParam = searchParams.get('page')
+    return pageParam ? parseInt(pageParam, 10) : 1
+  })
   const [itemsPerPage] = useState(30)
 
   const searchQuery = searchParams.get('search') || ""
@@ -40,10 +44,19 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
     return filtered
   }, [initialMovies, searchQuery, selectedHardDrive])
 
-  // Reset page when filters change
+  // Reset page when filters change, but NOT when initialMovies change
   useEffect(() => {
     setCurrentPage(1)
   }, [searchQuery, selectedHardDrive])
+  
+  // Keep current page when data updates (don't reset on data refresh)
+  useEffect(() => {
+    // Eğer mevcut sayfa toplam sayfa sayısından büyükse, son sayfaya git
+    const newTotalPages = Math.ceil(filteredMovies.length / itemsPerPage)
+    if (currentPage > newTotalPages && newTotalPages > 0) {
+      setCurrentPage(newTotalPages)
+    }
+  }, [filteredMovies.length, itemsPerPage, currentPage])
 
   const paginatedMovies = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
@@ -59,6 +72,17 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
     const currentScrollY = window.scrollY;
     setCurrentPage(page);
     
+    // URL'i güncelle
+    const params = new URLSearchParams(searchParams.toString())
+    if (page > 1) {
+      params.set('page', page.toString())
+    } else {
+      params.delete('page')
+    }
+    
+    const queryString = params.toString()
+    router.replace(queryString ? `/?${queryString}` : '/', { scroll: false })
+    
     if (maintainScroll) {
       // Scroll pozisyonunu korumak için bir sonraki render'da scroll'u geri yükle
       setTimeout(() => {
@@ -68,13 +92,13 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
   }
 
   const goToFirstPage = () => {
-    setCurrentPage(1)
+    handlePageChange(1, false)
     // İlk sayfaya giderken üste scroll etmek mantıklı
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const goToLastPage = () => {
-    setCurrentPage(totalPages)
+    handlePageChange(totalPages, false)
     // Son sayfaya giderken de üste scroll etmek mantıklı
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }

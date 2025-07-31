@@ -120,18 +120,16 @@ export class SecurityEnhancements {
   static sanitizeInput(input: string): string {
     return input
       .trim()
-      .replace(/[<>]/g, '') // Temel XSS koruması
-      .substring(0, 1000); // Maksimum uzunluk sınırı
+      .replace(/[<>]/g, '')
+      .substring(0, 1000);
   }
 
   static isValidAdmin(userIdentifier?: string): boolean {
     if (!userIdentifier) return false;
     
-    // Admin kullanıcı adı kontrolü
-    const adminUsernames = [
-      'kadirkilinc',
-      'admin'
-    ];
+    // Admin kullanıcılarını environment variable'dan al
+    const adminUsersEnv = process.env.ADMIN_USERNAME || process.env.ADMIN_USERNAME || '';
+    const adminUsernames = adminUsersEnv.split(',').map(u => u.trim().toLowerCase());
     
     return adminUsernames.includes(userIdentifier.toLowerCase());
   }

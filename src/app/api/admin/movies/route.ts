@@ -4,7 +4,13 @@ import { getServerSession } from 'next-auth';
 
 // Admin user validation
 function isValidAdmin(session: { user?: { name?: string | null } } | null): boolean {
-  return session?.user?.name === 'kadirkilinc';
+  if (!session?.user?.name) return false;
+  
+  // Admin kullanıcılarını environment variable'dan al
+  const adminUsersEnv = process.env.ADMIN_USERNAME || process.env.ADMIN_USERNAME || '';
+  const adminUsernames = adminUsersEnv.split(',').map(u => u.trim().toLowerCase());
+  
+  return adminUsernames.includes(session.user.name.toLowerCase());
 }
 
 // Rate limiting (basit implementation)

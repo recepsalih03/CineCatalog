@@ -33,18 +33,33 @@ export default function SearchAndFilters({ hardDrives }: SearchAndFiltersProps) 
   }
 
   const updateURL = (search: string, hardDrive: string | undefined) => {
-    const params = new URLSearchParams()
-    if (search) params.set('search', search)
-    if (hardDrive) params.set('hardDrive', hardDrive)
+    const params = new URLSearchParams(searchParams.toString())
+    
+    // Arama ve filtre parametrelerini güncelle
+    if (search) {
+      params.set('search', search)
+    } else {
+      params.delete('search')
+    }
+    
+    if (hardDrive) {
+      params.set('hardDrive', hardDrive)
+    } else {
+      params.delete('hardDrive')
+    }
+    
+    // Sayfa parametresini koru (varsa)
+    // Sadece arama/filtre değiştiğinde sayfa 1'e sıfırla
+    params.delete('page') // Yeni arama/filtre için sayfa sıfırla
     
     const queryString = params.toString()
-    router.push(queryString ? `/?${queryString}` : '/')
+    router.replace(queryString ? `/?${queryString}` : '/', { scroll: false })
   }
 
   const clearFilters = () => {
     setSearchQuery("")
     setSelectedHardDrive(undefined)
-    router.push('/')
+    router.replace('/', { scroll: false })
   }
 
   return (

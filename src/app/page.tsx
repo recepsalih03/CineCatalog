@@ -44,7 +44,7 @@ export default function Home() {
     const startPolling = () => {
       intervalId = setInterval(() => {
         loadMoviesData()
-      }, 30000) // Her 30 saniyede bir kontrol et
+      }, 300000) // Her 5 dakikada bir kontrol et
     }
 
     const handleVisibilityChange = () => {
