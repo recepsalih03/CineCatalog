@@ -49,7 +49,6 @@ export default function Home() {
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        loadMoviesData()
         startPolling()
       } else {
         clearInterval(intervalId)

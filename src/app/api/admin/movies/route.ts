@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     }
     
     if (!isValidAdmin(session)) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json({ error: 'Çıkış yapıp tekrar giriş yapın.' }, { status: 403 });
     }
     
     const identifier = session.user.name || 'unknown';
@@ -110,7 +110,7 @@ export async function PUT(request: NextRequest) {
     }
     
     if (!isValidAdmin(session)) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json({ error: 'Çıkış yapıp tekrar giriş yapın.' }, { status: 403 });
     }
     
     const identifier = session.user.name || 'unknown';
@@ -149,7 +149,7 @@ export async function DELETE(request: NextRequest) {
     }
     
     if (!isValidAdmin(session)) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+      return NextResponse.json({ error: 'Çıkış yapıp tekrar giriş yapın.' }, { status: 403 });
     }
     
     const identifier = session.user.name || 'unknown';
