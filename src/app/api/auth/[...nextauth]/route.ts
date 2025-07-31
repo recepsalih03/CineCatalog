@@ -57,16 +57,36 @@ const handler = NextAuth({
       maxAge: 24 * 60 * 60, // 24 hours
     },
     cookies: {
-      sessionToken: {
-        name: `next-auth.session-token`,
-        options: {
-          httpOnly: true,
-          sameSite: 'lax',
-          path: '/',
-          secure: process.env.NODE_ENV === 'production',
-        },
-      },
+  sessionToken: {
+    name: "__Secure-next-auth.session-token",
+    options: {
+      httpOnly: true,
+      sameSite: "none", 
+      path: "/",
+      secure: true,
+      domain: ".cinecatalog.com", 
     },
+  },
+  csrfToken: {
+    name: "__Host-next-auth.csrf-token",
+    options: {
+      httpOnly: true,
+      sameSite: "none",
+      path: "/", 
+      secure: true,
+    },
+  },
+  callbackUrl: {
+    name: "__Secure-next-auth.callback-url",
+    options: {
+      httpOnly: false,
+      sameSite: "none",
+      path: "/",
+      secure: true,
+      domain: ".cinecatalog.com",
+    },
+  },
+},
     secret: process.env.NEXTAUTH_SECRET,
     debug: process.env.NODE_ENV === 'development',
 });
