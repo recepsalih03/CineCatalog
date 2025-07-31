@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Movie, MovieFormData } from '@/types/movie';
 import { movieService } from '@/lib/movieService';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import AdminSearchInput from '@/components/AdminSearchInput';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import MovieForm from '@/components/MovieForm';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import HardDriveFilter from '@/components/HardDriveFilter';
-import { Pencil, Trash2, Plus, LogOut, Film, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Pencil, Trash2, Plus, LogOut, Film, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function AdminPanel() {
   const { data: session, status } = useSession();
@@ -27,13 +27,16 @@ export default function AdminPanel() {
   const [sortConfig, setSortConfig] = useState<{key: keyof Movie; direction: 'asc' | 'desc'} | null>(null);
   const [selectedHardDrive, setSelectedHardDrive] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
-  const [searchLoading, setSearchLoading] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(50);
   const [totalMovies, setTotalMovies] = useState(0);
+  
+  const handleSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -59,7 +62,6 @@ export default function AdminPanel() {
 
   const filterAndSortMovies = useCallback(async () => {
     try {
-      setSearchLoading(true);
       
       const filterMovies = () => {
         return new Promise<Movie[]>((resolve) => {
@@ -133,8 +135,6 @@ export default function AdminPanel() {
       console.error('Filtering error:', error);
       setFilteredMovies(movies);
       setTotalMovies(movies.length);
-    } finally {
-      setSearchLoading(false);
     }
   }, [movies, debouncedSearchQuery, selectedHardDrive, sortConfig])
 
@@ -389,19 +389,11 @@ export default function AdminPanel() {
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
               <div className="w-full">
-                <div className="relative">
-                  <Film className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#feca57]" />
-                  <Input
-                    placeholder="Film, yönetmen veya harddisk ara..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-10 bg-white/10 border-white/20 focus:border-[#feca57] focus:ring-1 focus:ring-[#feca57] text-sm"
-                    disabled={searchLoading}
-                  />
-                  {searchLoading && (
-                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#feca57] animate-spin" />
-                  )}
-                </div>
+                <AdminSearchInput
+                  onSearch={handleSearchChange}
+                  isLoading={false}
+                  placeholder="Film, yönetmen veya harddisk ara..."
+                />
               </div>
               <div className="w-full">
                 <HardDriveFilter
