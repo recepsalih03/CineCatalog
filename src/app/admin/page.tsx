@@ -182,43 +182,22 @@ export default function AdminPanel() {
 
   const handleCreateMovie = async (data: MovieFormData) => {
     try {
-      // Güvenlik kontrolleri
-      const { securityEnhancements } = await import('@/lib/securityEnhancements');
-      
-      
+      // Basit session kontrolü (server tarafta zaten güvenlik var)
       if (!session?.user) {
-        console.error('Session eksik:', session);
         throw new Error('Oturum geçersiz - Lütfen tekrar giriş yapın');
       }
 
-      const userId = session.user.id || session.user.name || 'anonymous';
-      const userName = session.user.name || 'unknown';
-
-      if (!securityEnhancements.isValidAdmin(userName)) {
-        throw new Error('Yetkiniz yok');
-      }
-
-      const canProceed = await securityEnhancements.checkRateLimit(userId);
-      if (!canProceed) {
-        throw new Error('Çok fazla istek. Lütfen bir dakika bekleyin.');
-      }
-
       const movieData = {
-        title: securityEnhancements.sanitizeInput(data.title),
+        title: data.title.trim(),
         year: parseInt(data.year),
-        director: securityEnhancements.sanitizeInput(data.director),
-        hardDrive: securityEnhancements.sanitizeInput(data.hardDrive),
+        director: data.director.trim(),
+        hardDrive: data.hardDrive.trim(),
         videoQuality: data.videoQuality,
         audioQuality: data.audioQuality,
         hasSubtitles: data.hasSubtitles,
-        movieLink: data.movieLink ? securityEnhancements.sanitizeInput(data.movieLink) : '',
-        directorLink: data.directorLink ? securityEnhancements.sanitizeInput(data.directorLink) : '',
+        movieLink: data.movieLink ? data.movieLink.trim() : '',
+        directorLink: data.directorLink ? data.directorLink.trim() : '',
       };
-
-      const validation = securityEnhancements.validateMovieData(movieData);
-      if (!validation.isValid) {
-        throw new Error(validation.errors.join(', '));
-      }
 
       // Admin API kullanarak film ekleme
       const response = await fetch('/api/admin/movies', {

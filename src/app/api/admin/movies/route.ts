@@ -4,12 +4,22 @@ import { getServerSession } from 'next-auth';
 
 // Admin user validation
 function isValidAdmin(session: { user?: { name?: string | null } } | null): boolean {
-  if (!session?.user?.name) return false;
+  if (!session?.user?.name) {
+    console.log('❌ Admin validation failed: No session user name');
+    return false;
+  }
   
   // Basit admin kontrolü - sadece ADMIN_USERNAME ile karşılaştır
   const adminUsername = process.env.ADMIN_USERNAME || '';
+  const isValid = session.user.name.toLowerCase() === adminUsername.toLowerCase();
   
-  return session.user.name.toLowerCase() === adminUsername.toLowerCase();
+  console.log('🔐 Admin validation:', {
+    sessionUserName: session.user.name,
+    adminUsername,
+    isValid
+  });
+  
+  return isValid;
 }
 
 // Rate limiting (basit implementation)
