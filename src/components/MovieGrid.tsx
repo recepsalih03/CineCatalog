@@ -23,7 +23,6 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
   const searchQuery = searchParams.get('search') || ""
   const selectedHardDrive = searchParams.get('hardDrive') || ""
 
-  // Filter movies based on URL parameters
   const filteredMovies = useMemo(() => {
     let filtered = initialMovies
 
@@ -44,14 +43,11 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
     return filtered
   }, [initialMovies, searchQuery, selectedHardDrive])
 
-  // Reset page when filters change, but NOT when initialMovies change
   useEffect(() => {
     setCurrentPage(1)
   }, [searchQuery, selectedHardDrive])
   
-  // Keep current page when data updates (don't reset on data refresh)
   useEffect(() => {
-    // Eğer mevcut sayfa toplam sayfa sayısından büyükse, son sayfaya git
     const newTotalPages = Math.ceil(filteredMovies.length / itemsPerPage)
     if (currentPage > newTotalPages && newTotalPages > 0) {
       setCurrentPage(newTotalPages)
@@ -71,8 +67,7 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
   const handlePageChange = (page: number, maintainScroll = true) => {
     const currentScrollY = window.scrollY;
     setCurrentPage(page);
-    
-    // URL'i güncelle
+
     const params = new URLSearchParams(searchParams.toString())
     if (page > 1) {
       params.set('page', page.toString())
@@ -84,7 +79,6 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
     router.replace(queryString ? `/?${queryString}` : '/', { scroll: false })
     
     if (maintainScroll) {
-      // Scroll pozisyonunu korumak için bir sonraki render'da scroll'u geri yükle
       setTimeout(() => {
         window.scrollTo({ top: currentScrollY, behavior: 'instant' });
       }, 0);
@@ -93,13 +87,11 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
 
   const goToFirstPage = () => {
     handlePageChange(1, false)
-    // İlk sayfaya giderken üste scroll etmek mantıklı
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const goToLastPage = () => {
     handlePageChange(totalPages, false)
-    // Son sayfaya giderken de üste scroll etmek mantıklı
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -110,7 +102,7 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
           <div className="space-y-4">
             <Film className="h-16 w-16 mx-auto text-muted-foreground/50" />
             <div className="space-y-2">
-              <h3 className="text-xl font-semibold">Henüz katalogunuzda film yok</h3>
+              <h3 className="text-xl font-semibold">Henüz arşivinizde film yok</h3>
               <p className="text-muted-foreground max-w-md mx-auto">
                 Admin paneli üzerinden film ekleyerek koleksiyonunuzu oluşturmaya başlayın.
               </p>
@@ -133,7 +125,6 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
 
   return (
     <>
-      {/* Results Summary */}
       <div className="mb-6 text-center">
         <p className="text-muted-foreground">
           {filteredMovies.length === initialMovies.length ? (
@@ -148,14 +139,12 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
         </p>
       </div>
 
-      {/* Movie Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
         {paginatedMovies.map((movie) => (
           <MovieCard key={movie.id} movie={movie} />
         ))}
       </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex flex-col gap-3 mt-6 px-2 sm:px-4">
           <div className="text-xs sm:text-sm text-muted-foreground text-center">
@@ -184,7 +173,6 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
               <span className="hidden sm:inline">Önceki</span>
             </Button>
             
-            {/* Page numbers - show fewer on mobile */}
             <div className="flex items-center gap-1">
               {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
                 let pageNum;

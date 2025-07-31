@@ -47,16 +47,13 @@ export default function AdminLogin() {
         setError('Geçersiz kullanıcı adı veya şifre');
         setTimeout(() => setError(''), 5000);
       } else if (result?.ok) {
-        // Session refresh için biraz bekle
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Force refresh session
         const session = await getSession();
         if (session) {
           router.push('/admin');
-          router.refresh(); // Force refresh
+          router.refresh();
         } else {
-          // Retry session check
           setTimeout(async () => {
             const retrySession = await getSession();
             if (retrySession) {
@@ -79,12 +76,10 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative">
-      {/* Theme Toggle */}
       <div className="absolute top-4 right-4 lg:top-6 lg:right-6">
         <ThemeToggle />
       </div>
       
-      {/* Home Button */}
       <div className="absolute top-4 left-4 lg:top-6 lg:left-6">
         <Link href="/">
           <Button className="btn-outline gap-1 lg:gap-2 px-3 lg:px-4 py-2 rounded-full text-sm lg:text-base">

@@ -1,4 +1,3 @@
-// route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { movieServiceAdmin } from '@/lib/movieServiceAdmin';
 import { Movie } from '@/types/movie';

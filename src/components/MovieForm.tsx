@@ -91,11 +91,10 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
     setJsonResults(null)
     
     try {
-      // JSON'daki problemli karakterleri temizle
       const cleanedJson = jsonData
-        .replace(/…/g, '...') // Unicode ellipsis'i normal noktalara çevir
-        .replace(/%20/g, ' ') // URL encode edilmiş boşlukları temizle
-        .replace(/%([0-9A-Fa-f]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16))); // Diğer URL encode karakterleri
+        .replace(/…/g, '...')
+        .replace(/%20/g, ' ')
+        .replace(/%([0-9A-Fa-f]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
       
       const parsedData = JSON.parse(cleanedJson)
       
@@ -164,7 +163,6 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
 
   return (
     <Card className="w-full max-w-2xl mx-auto bg-white dark:bg-gray-900 border border-white/20 rounded-xl shadow-2xl relative m-2 sm:m-4 max-h-[90vh] overflow-y-auto right-3.5">
-      {/* Close Button */}
       <Button 
         type="button" 
         onClick={onCancel}
@@ -224,7 +222,7 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
                 className="w-full h-48 sm:h-64 p-2 sm:p-3 text-xs sm:text-sm border border-white/20 bg-white/10 rounded-md focus:border-[#ff6b6b] focus:ring-1 focus:ring-[#ff6b6b] font-mono resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                Türkçe field isimleri desteklenir. Tek film için obje veya birden fazla film için array formatında JSON girebilirsiniz.
+                Türkçe alan isimleri desteklenir. Tek film için obje veya birden fazla film için array formatında JSON girebilirsiniz.
               </p>
             </div>
 
@@ -273,7 +271,6 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-          {/* Basic Information */}
           <div className="space-y-3 sm:space-y-4">
             <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-[#feca57]">
               <Film className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -326,7 +323,6 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
 
           <Separator />
 
-          {/* Technical Details */}
           <div className="space-y-3 sm:space-y-4">
             <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-[#feca57]">
               <HardDrive className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -416,7 +412,6 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
 
           <Separator />
 
-          {/* Optional Links */}
           <div className="space-y-3 sm:space-y-4">
             <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-[#feca57]">
               <LinkIcon className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -452,7 +447,6 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
             </div>
           </div>
 
-          {/* Form Actions */}
           <div className="flex justify-center pt-2 sm:pt-4">
             <Button type="submit" disabled={loading} className="btn-primary gap-2 px-6 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-base lg:text-lg w-full sm:w-auto">
               {loading ? (

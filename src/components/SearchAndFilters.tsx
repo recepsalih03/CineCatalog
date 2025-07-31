@@ -35,7 +35,6 @@ export default function SearchAndFilters({ hardDrives }: SearchAndFiltersProps) 
   const updateURL = (search: string, hardDrive: string | undefined) => {
     const params = new URLSearchParams(searchParams.toString())
     
-    // Arama ve filtre parametrelerini güncelle
     if (search) {
       params.set('search', search)
     } else {
@@ -48,9 +47,7 @@ export default function SearchAndFilters({ hardDrives }: SearchAndFiltersProps) 
       params.delete('hardDrive')
     }
     
-    // Sayfa parametresini koru (varsa)
-    // Sadece arama/filtre değiştiğinde sayfa 1'e sıfırla
-    params.delete('page') // Yeni arama/filtre için sayfa sıfırla
+    params.delete('page')
     
     const queryString = params.toString()
     router.replace(queryString ? `/?${queryString}` : '/', { scroll: false })
@@ -81,7 +78,6 @@ export default function SearchAndFilters({ hardDrives }: SearchAndFiltersProps) 
           </div>
         </div>
 
-        {/* Active Filters */}
         {(searchQuery || selectedHardDrive) && (
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-sm text-[#feca57] font-medium">🎯 Aktif filtreler:</span>

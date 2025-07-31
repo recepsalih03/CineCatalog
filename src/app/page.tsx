@@ -44,7 +44,7 @@ export default function Home() {
     const startPolling = () => {
       intervalId = setInterval(() => {
         loadMoviesData()
-      }, 300000) // Her 5 dakikada bir kontrol et
+      }, 300000)
     }
 
     const handleVisibilityChange = () => {
@@ -74,7 +74,7 @@ export default function Home() {
             <div className="absolute inset-0 h-12 w-12 mx-auto border-4 border-[#feca57] border-t-transparent rounded-full animate-spin" style={{animationDirection: 'reverse', animationDuration: '1s'}}></div>
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold gradient-text">Katalog yükleniyor...</h2>
+            <h2 className="text-2xl font-bold gradient-text">Arşiv yükleniyor...</h2>
             <p className="text-muted-foreground">🎬 Film koleksiyonunuz hazırlanıyor...</p>
           </div>
         </div>
@@ -109,7 +109,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Stats Summary */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 search-card rounded-lg p-4 border-0">
             <div className="flex items-center gap-3">
@@ -130,7 +129,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Search and Filters - Client Component */}
         <Suspense fallback={
           <Card className="search-card mb-6 lg:mb-10 border-0">
             <CardContent className="pt-6 pb-6 lg:pt-8 lg:pb-8">
@@ -144,7 +142,6 @@ export default function Home() {
           <SearchAndFilters hardDrives={hardDrives} />
         </Suspense>
 
-        {/* Movie Grid - Client Component with Server Data */}
         <Suspense fallback={
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {Array.from({ length: 12 }).map((_, i) => (

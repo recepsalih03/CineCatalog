@@ -30,7 +30,7 @@ export default function SearchBar({ onSearch, placeholder = "Film adı veya yön
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setQuery(value)
-    onSearch(value) // Real-time search
+    onSearch(value)
   }
 
   return (

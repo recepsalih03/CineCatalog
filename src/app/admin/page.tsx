@@ -182,7 +182,6 @@ export default function AdminPanel() {
 
   const handleCreateMovie = async (data: MovieFormData) => {
     try {
-      // Basit session kontrolü (server tarafta zaten güvenlik var)
       if (!session?.user) {
         throw new Error('Oturum geçersiz - Lütfen tekrar giriş yapın');
       }
@@ -199,7 +198,6 @@ export default function AdminPanel() {
         directorLink: data.directorLink ? data.directorLink.trim() : '',
       };
 
-      // Admin API kullanarak film ekleme
       const response = await fetch('/api/admin/movies', {
         method: 'POST',
         headers: {
@@ -233,7 +231,6 @@ export default function AdminPanel() {
     if (!selectedMovie?.id) return;
     
     try {
-      // Admin API kullanarak film güncelleme
       const updateData = {
         id: selectedMovie.id,
         title: data.title,
@@ -279,7 +276,6 @@ export default function AdminPanel() {
 
   const handleDeleteMovie = async (id: string) => {
     try {
-      // Admin API kullanarak film silme
       const response = await fetch(`/api/admin/movies?id=${id}`, {
         method: 'DELETE',
       });
@@ -389,7 +385,6 @@ export default function AdminPanel() {
           </div>
         </div>
 
-        {/* Search and Filters */}
         <div className="search-card border-0 p-4 lg:p-6 mb-6 lg:mb-10 rounded-xl">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
@@ -426,7 +421,6 @@ export default function AdminPanel() {
           
         </div>
 
-        {/* Top Pagination */}
         {totalPages > 1 && (
           <div className="flex flex-col gap-3 mb-4 px-2 sm:px-4">
             <div className="text-xs sm:text-sm text-muted-foreground text-center">
@@ -455,7 +449,6 @@ export default function AdminPanel() {
                 <span className="hidden sm:inline">Önceki</span>
               </Button>
               
-              {/* Page numbers - show fewer on mobile */}
               <div className="flex items-center gap-1">
                 {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
                   let pageNum;
@@ -639,7 +632,6 @@ export default function AdminPanel() {
           </Table>
         </div>
 
-        {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 px-4">
             <div className="text-sm text-muted-foreground">
@@ -666,7 +658,6 @@ export default function AdminPanel() {
                 Önceki
               </Button>
               
-              {/* Page numbers */}
               <div className="flex items-center gap-1">
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNum;

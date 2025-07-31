@@ -21,16 +21,13 @@ export async function validateAdminCredentials(credentials: AdminCredentials): P
     return false;
   }
   
-  // Input'ları temizle
   const cleanUsername = username.trim().toLowerCase();
   const cleanAdminUsername = adminUsername.trim().toLowerCase();
   
-  // Basit string karşılaştırması - daha stabil
   if (cleanUsername !== cleanAdminUsername) {
     return false;
   }
   
-  // Şifre için de basit karşılaştırma
   const cleanPassword = password.trim();
   const cleanAdminPassword = adminPassword.trim();
   
