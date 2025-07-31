@@ -91,7 +91,13 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
     setJsonResults(null)
     
     try {
-      const parsedData = JSON.parse(jsonData)
+      // JSON'daki problemli karakterleri temizle
+      const cleanedJson = jsonData
+        .replace(/…/g, '...') // Unicode ellipsis'i normal noktalara çevir
+        .replace(/%20/g, ' ') // URL encode edilmiş boşlukları temizle
+        .replace(/%([0-9A-Fa-f]{2})/g, (match, hex) => String.fromCharCode(parseInt(hex, 16))); // Diğer URL encode karakterleri
+      
+      const parsedData = JSON.parse(cleanedJson)
       
       const response = await fetch('/api/movies', {
         method: 'POST',
@@ -157,7 +163,7 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto bg-white dark:bg-gray-900 border-border relative m-4">
+    <Card className="w-full max-w-2xl mx-auto bg-white dark:bg-gray-900 border border-white/20 rounded-xl shadow-2xl relative m-2 sm:m-4 max-h-[90vh] overflow-y-auto right-3.5">
       {/* Close Button */}
       <Button 
         type="button" 
@@ -215,7 +221,7 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
                 value={jsonData}
                 onChange={(e) => setJsonData(e.target.value)}
                 placeholder={getJsonExample()}
-                className="w-full h-64 p-3 text-sm border border-white/20 bg-white/10 rounded-md focus:border-[#ff6b6b] focus:ring-1 focus:ring-[#ff6b6b] font-mono"
+                className="w-full h-48 sm:h-64 p-2 sm:p-3 text-xs sm:text-sm border border-white/20 bg-white/10 rounded-md focus:border-[#ff6b6b] focus:ring-1 focus:ring-[#ff6b6b] font-mono resize-none"
               />
               <p className="text-xs text-muted-foreground">
                 Türkçe field isimleri desteklenir. Tek film için obje veya birden fazla film için array formatında JSON girebilirsiniz.
@@ -249,7 +255,7 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
                 type="button"
                 onClick={handleJsonSubmit}
                 disabled={loading || !jsonData.trim()}
-                className="btn-primary gap-2 px-6 py-2 rounded-full text-sm"
+                className="btn-primary gap-2 px-4 sm:px-6 py-2 rounded-full text-xs sm:text-sm w-full sm:w-auto"
               >
                 {loading ? (
                   <>
@@ -355,7 +361,7 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
                 </Label>
                 <select
                   id="videoQuality"
-                  className="flex h-10 w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#ff6b6b] focus:border-[#ff6b6b] cursor-pointer"
+                  className="flex h-10 w-full rounded-md border border-white/20 bg-white/10 px-2 sm:px-3 py-2 text-xs sm:text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#ff6b6b] focus:border-[#ff6b6b] cursor-pointer"
                   value={formData.videoQuality}
                   onChange={(e) => handleChange("videoQuality", e.target.value)}
                 >
@@ -380,7 +386,7 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
                 </Label>
                 <select
                   id="audioQuality"
-                  className="flex h-10 w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#feca57] focus:border-[#feca57] cursor-pointer"
+                  className="flex h-10 w-full rounded-md border border-white/20 bg-white/10 px-2 sm:px-3 py-2 text-xs sm:text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#feca57] focus:border-[#feca57] cursor-pointer"
                   value={formData.audioQuality}
                   onChange={(e) => handleChange("audioQuality", e.target.value)}
                 >

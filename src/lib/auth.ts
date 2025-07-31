@@ -21,27 +21,20 @@ export async function validateAdminCredentials(credentials: AdminCredentials): P
     return false;
   }
   
-  const hashedInputUsername = hashWithSHA256(username);
-  const hashedStoredUsername = hashWithSHA256(adminUsername);
+  // Input'ları temizle
+  const cleanUsername = username.trim().toLowerCase();
+  const cleanAdminUsername = adminUsername.trim().toLowerCase();
   
-  if (hashedInputUsername !== hashedStoredUsername) {
+  // Basit string karşılaştırması - daha stabil
+  if (cleanUsername !== cleanAdminUsername) {
     return false;
   }
   
-  const isHashed = adminPassword.startsWith('$2');
+  // Şifre için de basit karşılaştırma
+  const cleanPassword = password.trim();
+  const cleanAdminPassword = adminPassword.trim();
   
-  if (isHashed) {
-    try {
-      return await bcrypt.compare(password, adminPassword);
-    } catch (error) {
-      console.error('Bcrypt comparison error:', error);
-      return false;
-    }
-  } else {
-    const hashedInputPassword = hashWithSHA256(password);
-    const hashedStoredPassword = hashWithSHA256(adminPassword);
-    return hashedInputPassword === hashedStoredPassword;
-  }
+  return cleanPassword === cleanAdminPassword;
 }
 
 export function hashPassword(password: string): Promise<string> {

@@ -55,18 +55,27 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
     return Math.ceil(filteredMovies.length / itemsPerPage)
   }, [filteredMovies.length, itemsPerPage])
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+  const handlePageChange = (page: number, maintainScroll = true) => {
+    const currentScrollY = window.scrollY;
+    setCurrentPage(page);
+    
+    if (maintainScroll) {
+      // Scroll pozisyonunu korumak için bir sonraki render'da scroll'u geri yükle
+      setTimeout(() => {
+        window.scrollTo({ top: currentScrollY, behavior: 'instant' });
+      }, 0);
+    }
   }
 
   const goToFirstPage = () => {
     setCurrentPage(1)
+    // İlk sayfaya giderken üste scroll etmek mantıklı
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const goToLastPage = () => {
     setCurrentPage(totalPages)
+    // Son sayfaya giderken de üste scroll etmek mantıklı
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 

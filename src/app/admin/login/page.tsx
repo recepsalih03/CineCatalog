@@ -89,7 +89,7 @@ export default function AdminLogin() {
           <Button className="btn-outline gap-1 lg:gap-2 px-3 lg:px-4 py-2 rounded-full text-sm lg:text-base">
             <Home className="w-3 h-3 lg:w-4 lg:h-4" />
             <span className="hidden sm:inline">Ana Sayfa</span>
-            <span className="sm:hidden">Ana</span>
+            <span className="sm:hidden">Ana Sayfa</span>
           </Button>
         </Link>
       </div>

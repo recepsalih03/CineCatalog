@@ -284,8 +284,16 @@ export default function AdminPanel() {
     return Math.ceil(totalMovies / itemsPerPage);
   }, [totalMovies, itemsPerPage]);
 
-  const handlePageChange = useCallback((page: number) => {
+  const handlePageChange = useCallback((page: number, maintainScroll = true) => {
+    const currentScrollY = window.scrollY;
     setCurrentPage(page);
+    
+    if (maintainScroll) {
+      // Scroll pozisyonunu korumak için bir sonraki render'da scroll'u geri yükle
+      setTimeout(() => {
+        window.scrollTo({ top: currentScrollY, behavior: 'instant' });
+      }, 0);
+    }
   }, []);
 
   if (status === 'loading' || loading) {
@@ -326,12 +334,12 @@ export default function AdminPanel() {
               <Button onClick={() => router.push('/')} className="btn-secondary gap-1 px-2 sm:px-3 lg:px-4 py-2 rounded-full text-xs sm:text-sm">
                 <Film className="w-3 h-3 lg:w-4 lg:h-4" />
                 <span className="hidden sm:inline">Ana Sayfa</span>
-                <span className="sm:hidden">Ana</span>
+                <span className="sm:hidden">Ana Sayfa</span>
               </Button>
               <Button onClick={() => signOut()} className="btn-outline gap-1 px-2 sm:px-3 lg:px-4 py-2 rounded-full hover:bg-red-500/20 hover:text-red-400 hover:border-red-400 text-xs sm:text-sm">
                 <LogOut className="w-3 h-3 lg:w-4 lg:h-4" />
                 <span className="hidden sm:inline">Çıkış</span>
-                <span className="sm:hidden">Çık</span>
+                <span className="sm:hidden">Çıkış</span>
               </Button>
             </div>
           </div>
@@ -384,7 +392,7 @@ export default function AdminPanel() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handlePageChange(1)}
+                onClick={() => handlePageChange(1, false)}
                 disabled={currentPage === 1}
                 className="btn-outline gap-1 text-xs px-2 sm:px-3"
               >
@@ -446,7 +454,7 @@ export default function AdminPanel() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handlePageChange(totalPages)}
+                onClick={() => handlePageChange(totalPages, false)}
                 disabled={currentPage === totalPages}
                 className="btn-outline gap-1 text-xs px-2 sm:px-3"
               >
@@ -597,7 +605,7 @@ export default function AdminPanel() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handlePageChange(1)}
+                onClick={() => handlePageChange(1, false)}
                 disabled={currentPage === 1}
                 className="btn-outline gap-1"
               >
@@ -655,7 +663,7 @@ export default function AdminPanel() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handlePageChange(totalPages)}
+                onClick={() => handlePageChange(totalPages, false)}
                 disabled={currentPage === totalPages}
                 className="btn-outline gap-1"
               >
@@ -674,7 +682,7 @@ export default function AdminPanel() {
         )}
 
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-          <DialogContent className="max-w-2xl p-0 bg-transparent border-0 shadow-none" showCloseButton={false}>
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl p-0 bg-transparent border-0 shadow-none max-h-[95vh] overflow-hidden" showCloseButton={false}>
             <DialogHeader className="hidden">
               <DialogTitle>
                 {selectedMovie ? 'Filmi Düzenle' : 'Yeni Film Ekle'}
