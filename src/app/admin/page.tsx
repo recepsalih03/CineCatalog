@@ -189,7 +189,7 @@ export default function AdminPanel() {
         throw new Error('Oturum geçersiz');
       }
 
-      if (!securityEnhancements.isValidAdmin(session.user.email || undefined)) {
+      if (!securityEnhancements.isValidAdmin(session.user.name || undefined)) {
         throw new Error('Yetkiniz yok');
       }
 

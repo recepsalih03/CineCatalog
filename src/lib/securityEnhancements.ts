@@ -1,11 +1,5 @@
-import { collection, doc, getDoc, setDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from './firebase';
-
-interface RateLimitEntry {
-  requests: number;
-  windowStart: Date;
-  lastRequest: Date;
-}
 
 export class SecurityEnhancements {
   private static readonly RATE_LIMIT_WINDOW = 60 * 1000; // 1 dakika
@@ -125,16 +119,16 @@ export class SecurityEnhancements {
       .substring(0, 1000); // Maksimum uzunluk sınırı
   }
 
-  static isValidAdmin(email?: string): boolean {
-    if (!email) return false;
+  static isValidAdmin(userIdentifier?: string): boolean {
+    if (!userIdentifier) return false;
     
-    const adminEmails = [
-      'admin@example.com',
-      'recep@example.com',
-      // Gerçek admin e-postalarını buraya ekleyin
+    // Admin kullanıcı adı kontrolü
+    const adminUsernames = [
+      'kadirkilinc',
+      'admin'
     ];
     
-    return adminEmails.includes(email.toLowerCase());
+    return adminUsernames.includes(userIdentifier.toLowerCase());
   }
 }
 

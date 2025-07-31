@@ -24,8 +24,8 @@ const handler = NextAuth({
             const secureUserId = hashWithSHA256(`admin-${Date.now()}`);
             return {
               id: secureUserId,
-              name: 'Admin',
-              email: 'admin@moviecatalog.com',
+              name: credentials.username, // Gerçek kullanıcı adını döndür
+              email: 'kadirkilinc@moviecatalog.com',
             };
           }
 
@@ -58,32 +58,32 @@ const handler = NextAuth({
     },
     cookies: {
   sessionToken: {
-    name: "__Secure-next-auth.session-token",
+    name: process.env.NODE_ENV === 'production' ? "__Secure-next-auth.session-token" : "next-auth.session-token",
     options: {
       httpOnly: true,
-      sameSite: "none", 
+      sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", 
       path: "/",
-      secure: true,
-      domain: ".cinecatalog.com", 
+      secure: process.env.NODE_ENV === 'production',
+      domain: process.env.NODE_ENV === 'production' ? ".cinecatalog.com" : undefined, 
     },
   },
   csrfToken: {
-    name: "__Host-next-auth.csrf-token",
+    name: process.env.NODE_ENV === 'production' ? "__Host-next-auth.csrf-token" : "next-auth.csrf-token",
     options: {
       httpOnly: true,
-      sameSite: "none",
+      sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax",
       path: "/", 
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
     },
   },
   callbackUrl: {
-    name: "__Secure-next-auth.callback-url",
+    name: process.env.NODE_ENV === 'production' ? "__Secure-next-auth.callback-url" : "next-auth.callback-url",
     options: {
       httpOnly: false,
-      sameSite: "none",
+      sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax",
       path: "/",
-      secure: true,
-      domain: ".cinecatalog.com",
+      secure: process.env.NODE_ENV === 'production',
+      domain: process.env.NODE_ENV === 'production' ? ".cinecatalog.com" : undefined,
     },
   },
 },
