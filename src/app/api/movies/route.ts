@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     if (Array.isArray(body)) {
-      const results = [];
-      const errors = [];
+      const results: Array<{ index: number; id: string; title: string; success: boolean }> = [];
+      const errors: Array<{ index: number; error: string; data: unknown }> = [];
       const BATCH_SIZE = 50;
 
       for (let batchStart = 0; batchStart < body.length; batchStart += BATCH_SIZE) {

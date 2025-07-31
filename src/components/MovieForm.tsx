@@ -95,7 +95,7 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
       const cleanedJson = jsonData
         .replace(/…/g, '...') // Unicode ellipsis'i normal noktalara çevir
         .replace(/%20/g, ' ') // URL encode edilmiş boşlukları temizle
-        .replace(/%([0-9A-Fa-f]{2})/g, (match, hex) => String.fromCharCode(parseInt(hex, 16))); // Diğer URL encode karakterleri
+        .replace(/%([0-9A-Fa-f]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16))); // Diğer URL encode karakterleri
       
       const parsedData = JSON.parse(cleanedJson)
       
