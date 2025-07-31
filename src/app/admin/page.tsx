@@ -185,15 +185,21 @@ export default function AdminPanel() {
       // Güvenlik kontrolleri
       const { securityEnhancements } = await import('@/lib/securityEnhancements');
       
-      if (!session?.user?.id) {
-        throw new Error('Oturum geçersiz');
+      console.log('Session debug:', { session, user: session?.user });
+      
+      if (!session?.user) {
+        console.error('Session eksik:', session);
+        throw new Error('Oturum geçersiz - Lütfen tekrar giriş yapın');
       }
 
-      if (!securityEnhancements.isValidAdmin(session.user.name || undefined)) {
+      const userId = session.user.id || session.user.email || 'anonymous';
+      const userName = session.user.name || 'unknown';
+
+      if (!securityEnhancements.isValidAdmin(userName)) {
         throw new Error('Yetkiniz yok');
       }
 
-      const canProceed = await securityEnhancements.checkRateLimit(session.user.id);
+      const canProceed = await securityEnhancements.checkRateLimit(userId);
       if (!canProceed) {
         throw new Error('Çok fazla istek. Lütfen bir dakika bekleyin.');
       }
@@ -215,7 +221,7 @@ export default function AdminPanel() {
         throw new Error(validation.errors.join(', '));
       }
 
-      await movieService.createMovie(movieData, session.user.id, session.user.email || undefined);
+      await movieService.createMovie(movieData, userId, session.user.email || undefined);
       setIsFormOpen(false);
       loadMovies();
       toast({
@@ -236,6 +242,7 @@ export default function AdminPanel() {
     if (!selectedMovie?.id) return;
     
     try {
+      const userId = session?.user?.id || session?.user?.email || 'anonymous';
       await movieService.updateMovie(selectedMovie.id, {
         title: data.title,
         year: parseInt(data.year),
@@ -246,7 +253,7 @@ export default function AdminPanel() {
         hasSubtitles: data.hasSubtitles,
         movieLink: data.movieLink,
         directorLink: data.directorLink,
-      }, session?.user?.id, session?.user?.email || undefined);
+      }, userId, session?.user?.email || undefined);
       setIsFormOpen(false);
       setSelectedMovie(null);
       loadMovies();
@@ -266,7 +273,8 @@ export default function AdminPanel() {
 
   const handleDeleteMovie = async (id: string) => {
     try {
-      await movieService.deleteMovie(id, session?.user?.id, session?.user?.email || undefined);
+      const userId = session?.user?.id || session?.user?.email || 'anonymous';
+      await movieService.deleteMovie(id, userId, session?.user?.email || undefined);
       loadMovies();
       toast({
         title: "Film silindi",

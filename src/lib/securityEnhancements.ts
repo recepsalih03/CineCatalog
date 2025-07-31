@@ -7,6 +7,11 @@ export class SecurityEnhancements {
 
   static async checkRateLimit(userId: string): Promise<boolean> {
     try {
+      // Eğer userId yoksa veya 'anonymous' ise rate limiting'i atla
+      if (!userId || userId === 'anonymous' || userId === 'unknown') {
+        return true;
+      }
+      
       const rateLimitRef = doc(db, 'rate_limits', userId);
       const rateLimitDoc = await getDoc(rateLimitRef);
       

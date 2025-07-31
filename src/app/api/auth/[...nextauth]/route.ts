@@ -40,12 +40,16 @@ const handler = NextAuth({
       async jwt({ token, user }) {
         if (user) {
           token.role = 'admin';
+          token.userId = user.id;
+          token.userName = user.name;
           token.secureHash = hashWithSHA256(`${user.id}-${token.iat}`);
         }
         return token;
       },
       async session({ session, token }) {
         if (token) {
+          session.user.id = token.userId as string;
+          session.user.name = token.userName as string;
           session.user.role = token.role as string;
           session.user.secureHash = token.secureHash as string;
         }
