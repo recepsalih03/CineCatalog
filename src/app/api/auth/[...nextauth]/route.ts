@@ -41,7 +41,7 @@ const handler = NextAuth({
         if (user) {
           token.role = 'admin';
           token.userId = user.id;
-          token.userName = user.name;
+          token.userName = user.name || undefined;
           token.secureHash = hashWithSHA256(`${user.id}-${token.iat}`);
         }
         return token;
@@ -49,7 +49,7 @@ const handler = NextAuth({
       async session({ session, token }) {
         if (token) {
           session.user.id = token.userId as string;
-          session.user.name = token.userName as string;
+          session.user.name = (token.userName as string) || null;
           session.user.role = token.role as string;
           session.user.secureHash = token.secureHash as string;
         }

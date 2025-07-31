@@ -100,11 +100,11 @@ export async function POST(request: NextRequest) {
             try {
               const movieId = await movieService.createMovie(movieToCreate);
               results.push({ index: actualIndex, id: movieId, title: movieToCreate.title, success: true });
-            } catch (createError) {
+            } catch {
               errors.push({ index: actualIndex, error: 'Database error', data: movieData });
               continue;
             }
-          } catch (error) {
+          } catch {
             errors.push({ index: actualIndex, error: 'Bilinmeyen hata', data: batch[i] });
           }
         }
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
         message: 'Film başarıyla eklendi'
       });
     }
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'İşlem sırasında hata oluştu', success: false }, { status: 500 });
   }
 }
@@ -182,7 +182,7 @@ export async function GET() {
   try {
     const movies = await movieService.getAllMovies();
     return NextResponse.json({ success: true, data: movies });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Filmler yüklenirken hata oluştu', success: false }, { status: 500 });
   }
 }
