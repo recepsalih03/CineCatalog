@@ -127,11 +127,10 @@ export class SecurityEnhancements {
   static isValidAdmin(userIdentifier?: string): boolean {
     if (!userIdentifier) return false;
     
-    // Admin kullanıcılarını environment variable'dan al
-    const adminUsersEnv = process.env.ADMIN_USERNAME || process.env.ADMIN_USERNAME || '';
-    const adminUsernames = adminUsersEnv.split(',').map(u => u.trim().toLowerCase());
+    // Basit admin kontrolü - sadece ADMIN_USERNAME ile karşılaştır
+    const adminUsername = process.env.ADMIN_USERNAME || '';
     
-    return adminUsernames.includes(userIdentifier.toLowerCase());
+    return userIdentifier.toLowerCase() === adminUsername.toLowerCase();
   }
 }
 

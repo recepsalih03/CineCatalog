@@ -25,7 +25,6 @@ const handler = NextAuth({
             return {
               id: secureUserId,
               name: credentials.username,
-              email: '',
             };
           }
 

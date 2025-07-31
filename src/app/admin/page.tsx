@@ -185,14 +185,13 @@ export default function AdminPanel() {
       // Güvenlik kontrolleri
       const { securityEnhancements } = await import('@/lib/securityEnhancements');
       
-      console.log('Session debug:', { session, user: session?.user });
       
       if (!session?.user) {
         console.error('Session eksik:', session);
         throw new Error('Oturum geçersiz - Lütfen tekrar giriş yapın');
       }
 
-      const userId = session.user.id || session.user.email || 'anonymous';
+      const userId = session.user.id || session.user.name || 'anonymous';
       const userName = session.user.name || 'unknown';
 
       if (!securityEnhancements.isValidAdmin(userName)) {
