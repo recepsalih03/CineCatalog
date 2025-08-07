@@ -18,7 +18,7 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
     const pageParam = searchParams.get('page')
     return pageParam ? parseInt(pageParam, 10) : 1
   })
-  const [itemsPerPage] = useState(20)
+  const [itemsPerPage] = useState(25)
 
   const searchQuery = searchParams.get('search') || ""
   const selectedHardDrive = searchParams.get('hardDrive') || ""

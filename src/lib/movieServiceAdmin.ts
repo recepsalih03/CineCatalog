@@ -85,5 +85,47 @@ export const movieServiceAdmin = {
       console.error('❌ Admin: Error fetching unique hard drives:', error);
       throw error;
     }
+  },
+
+  async bulkUpdateHardDrive(oldHardDrive: string, newHardDrive: string): Promise<{ updatedCount: number }> {
+    try {
+      console.log(`🔄 Admin: Toplu güncelleme başlatılıyor: "${oldHardDrive}" -> "${newHardDrive}"`);
+
+      const querySnapshot = await db.collection(COLLECTION_NAME).where('hardDrive', '==', oldHardDrive).get();
+
+      console.log(`📦 Admin: ${querySnapshot.size} film bulundu`);
+
+      if (querySnapshot.empty) {
+        return { updatedCount: 0 };
+      }
+
+      const batchSize = 500;
+      const docs = querySnapshot.docs;
+      let totalUpdated = 0;
+
+      for (let i = 0; i < docs.length; i += batchSize) {
+        const batch = db.batch();
+        const batchDocs = docs.slice(i, i + batchSize);
+
+        batchDocs.forEach((docSnapshot) => {
+          const docRef = db.collection(COLLECTION_NAME).doc(docSnapshot.id);
+          batch.update(docRef, { 
+            hardDrive: newHardDrive,
+            updatedAt: new Date()
+          });
+        });
+
+        await batch.commit();
+        totalUpdated += batchDocs.length;
+        console.log(`✅ Admin: ${totalUpdated}/${docs.length} film güncellendi`);
+      }
+
+      console.log(`🎉 Admin: Toplu güncelleme tamamlandı. ${totalUpdated} film güncellendi.`);
+      return { updatedCount: totalUpdated };
+
+    } catch (error) {
+      console.error('❌ Admin: Error in bulk update:', error);
+      throw error;
+    }
   }
 };

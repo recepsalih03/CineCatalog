@@ -33,6 +33,11 @@ export default function AdminPanel() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(50);
   const [totalMovies, setTotalMovies] = useState(0);
+  const [isBulkUpdateOpen, setIsBulkUpdateOpen] = useState(false);
+  const [bulkUpdateData, setBulkUpdateData] = useState({
+    oldHardDrive: '',
+    newHardDrive: ''
+  });
   
   const handleSearchChange = useCallback((query: string) => {
     setSearchQuery(query);
@@ -362,6 +367,48 @@ export default function AdminPanel() {
     }
   }, []);
 
+  const handleBulkUpdate = async () => {
+    if (!bulkUpdateData.oldHardDrive || !bulkUpdateData.newHardDrive) {
+      toast({
+        variant: "destructive",
+        title: "Hata",
+        description: "Lütfen eski ve yeni harddisk isimlerini girin.",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/bulk-update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bulkUpdateData),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Toplu güncelleme sırasında hata oluştu');
+      }
+
+      setIsBulkUpdateOpen(false);
+      setBulkUpdateData({ oldHardDrive: '', newHardDrive: '' });
+      loadMovies();
+      toast({
+        title: "Toplu güncelleme tamamlandı",
+        description: `${result.updatedCount} film güncellendi`,
+      });
+    } catch (error: unknown) {
+      console.error('Toplu güncelleme hatası:', error);
+      toast({
+        variant: "destructive",
+        title: "Hata",
+        description: `Toplu güncelleme sırasında hata oluştu: ${(error as Error)?.message || 'Bilinmeyen hata'}`,
+      });
+    }
+  };
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -429,7 +476,11 @@ export default function AdminPanel() {
                 />
               </div>
             </div>
-            <div className="flex justify-center sm:justify-end">
+            <div className="flex flex-col sm:flex-row justify-center sm:justify-end gap-2">
+              <Button onClick={() => setIsBulkUpdateOpen(true)} className="btn-secondary gap-2 px-4 sm:px-6 py-2 rounded-full text-sm w-full sm:w-auto">
+                <Film className="w-4 h-4" />
+                Toplu Güncelle
+              </Button>
               <Button onClick={openCreateForm} className="btn-primary gap-2 px-4 sm:px-6 py-2 rounded-full text-sm w-full sm:w-auto">
                 <Plus className="w-4 h-4" />
                 Film Ekle
@@ -766,6 +817,49 @@ export default function AdminPanel() {
               title={selectedMovie ? 'Filmi Düzenle' : 'Yeni Film Ekle'}
               existingHardDrives={Array.from(new Set(movies.map(m => m.hardDrive))).sort()}
             />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isBulkUpdateOpen} onOpenChange={setIsBulkUpdateOpen}>
+          <DialogContent className="max-w-md bg-white dark:bg-gray-900 border border-white/20">
+            <DialogHeader>
+              <DialogTitle>Toplu Harddisk İsmi Güncelleme</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="oldHardDrive" className="text-sm font-medium">Eski Harddisk Adı</label>
+                <select
+                  id="oldHardDrive"
+                  value={bulkUpdateData.oldHardDrive}
+                  onChange={(e) => setBulkUpdateData(prev => ({ ...prev, oldHardDrive: e.target.value }))}
+                  className="flex h-10 w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm"
+                >
+                  <option value="">Seçiniz</option>
+                  {Array.from(new Set(movies.map(m => m.hardDrive))).sort().map(hd => (
+                    <option key={hd} value={hd} className="bg-gray-800 text-white">{hd}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="newHardDrive" className="text-sm font-medium">Yeni Harddisk Adı</label>
+                <input
+                  id="newHardDrive"
+                  type="text"
+                  value={bulkUpdateData.newHardDrive}
+                  onChange={(e) => setBulkUpdateData(prev => ({ ...prev, newHardDrive: e.target.value }))}
+                  placeholder="Yeni harddisk adını girin"
+                  className="flex h-10 w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setIsBulkUpdateOpen(false)}>
+                  İptal
+                </Button>
+                <Button onClick={handleBulkUpdate} className="btn-primary">
+                  Güncelle
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
 

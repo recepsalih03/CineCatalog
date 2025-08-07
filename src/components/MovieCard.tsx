@@ -13,13 +13,13 @@ interface MovieCardProps {
 
 const MovieCard = memo(function MovieCard({ movie }: MovieCardProps) {
   return (
-    <Card className={`movie-card border-0 relative overflow-hidden ${movie.watched ? 'ring-1 ring-green-400/30' : ''} ${!movie.posterUrl ? 'min-h-64 sm:min-h-72 md:min-h-80 lg:min-h-96' : ''}`}>
+    <Card className={`movie-card border-0 relative overflow-hidden ${movie.watched ? 'ring-1 ring-green-400/30' : ''} ${!movie.posterUrl ? 'min-h-48 sm:min-h-56 md:aspect-[2/3]' : ''}`}>
       {movie.watched && (
         <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-emerald-500/5 pointer-events-none" />
       )}
       
       {movie.posterUrl && (
-        <div className="w-full h-64 sm:h-72 md:h-80 lg:h-96 overflow-hidden rounded-t-lg">
+        <div className="w-full aspect-[2/3] overflow-hidden rounded-t-lg">
           <img 
             src={movie.posterUrl} 
             alt={`${movie.title} poster`}
