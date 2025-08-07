@@ -405,6 +405,14 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
                   <option value="DTS-HD MA 5.1" className="bg-gray-800 text-white">DTS-HD MA 5.1</option>
                   <option value="DTS-HD MA 6.1" className="bg-gray-800 text-white">DTS-HD MA 6.1</option>
                   <option value="DTS-HD MA 7.1" className="bg-gray-800 text-white">DTS-HD MA 7.1</option>
+                  <option value="TRUE HD 2.0" className="bg-gray-800 text-white">TRUE HD 2.0</option>
+                  <option value="TRUE HD 5.1" className="bg-gray-800 text-white">TRUE HD 5.1</option>
+                  <option value="TRUE HD Atmos 7.1" className="bg-gray-800 text-white">TRUE HD Atmos 7.1</option>
+                  <option value="LPCM 1.0" className="bg-gray-800 text-white">LPCM 1.0</option>
+                  <option value="LPCM 2.0" className="bg-gray-800 text-white">LPCM 2.0</option>
+                  <option value="LPCM 5.1" className="bg-gray-800 text-white">LPCM 5.1</option>
+                  <option value="FLAC 1.0" className="bg-gray-800 text-white">FLAC 1.0</option>
+                  <option value="FLAC 2.0" className="bg-gray-800 text-white">FLAC 2.0</option>
                 </select>
               </div>
             </div>
