@@ -13,11 +13,27 @@ interface MovieCardProps {
 
 const MovieCard = memo(function MovieCard({ movie }: MovieCardProps) {
   return (
-    <Card className={`movie-card border-0 h-full relative overflow-hidden ${movie.watched ? 'ring-1 ring-green-400/30' : ''}`}>
+    <Card className={`movie-card border-0 relative overflow-hidden ${movie.watched ? 'ring-1 ring-green-400/30' : ''} ${!movie.posterUrl ? 'min-h-64 sm:min-h-72 md:min-h-80 lg:min-h-96' : ''}`}>
       {movie.watched && (
         <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-emerald-500/5 pointer-events-none" />
       )}
-      <CardContent className="p-3 h-full flex flex-col relative z-10">
+      
+      {movie.posterUrl && (
+        <div className="w-full h-64 sm:h-72 md:h-80 lg:h-96 overflow-hidden rounded-t-lg">
+          <img 
+            src={movie.posterUrl} 
+            alt={`${movie.title} poster`}
+            className="w-full h-full object-cover transition-transform duration-200 hover:scale-105"
+            loading="lazy"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+          />
+        </div>
+      )}
+      
+      <CardContent className={`p-3 flex flex-col relative z-10 ${!movie.posterUrl ? 'justify-center h-full' : ''}`}>
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2">
             <Film className="h-4 w-4 text-[#ff6b6b]" />
@@ -39,7 +55,7 @@ const MovieCard = memo(function MovieCard({ movie }: MovieCardProps) {
           </Badge>
         </div>
 
-        <div className="flex-1 space-y-2">
+        <div className="space-y-2">
           <div>
             <h3 className="text-sm font-bold text-foreground line-clamp-2 leading-tight mb-1">
               {movie.movieLink && movie.movieLink.trim() ? (

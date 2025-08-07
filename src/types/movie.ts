@@ -10,6 +10,7 @@ export interface Movie {
   watched?: boolean;
   movieLink?: string;
   directorLink?: string;
+  posterUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

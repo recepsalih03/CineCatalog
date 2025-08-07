@@ -19,6 +19,24 @@ import { Movie } from '@/types/movie';
 
 const COLLECTION_NAME = 'movies';
 
+function extractPosterUrlFromMovieLink(movieLink?: string): string | undefined {
+  if (!movieLink || !movieLink.includes('turkcealtyazi.org')) {
+    return undefined;
+  }
+  
+  try {
+    const movieIdMatch = movieLink.match(/\/mov\/(\d+)\//);
+    if (movieIdMatch && movieIdMatch[1]) {
+      const movieId = movieIdMatch[1];
+      return `https://turkcealtyazi.org/images/poster/${movieId}.jpg`;
+    }
+  } catch (error) {
+    console.warn('Error extracting poster URL from movie link:', error);
+  }
+  
+  return undefined;
+}
+
 export const movieService = {
   async getAllMovies(maxResults?: number): Promise<Movie[]> {
     try {
@@ -28,12 +46,21 @@ export const movieService = {
         : query(moviesCollection, orderBy('title'));
       const querySnapshot = await getDocs(q);
       
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate(),
-        updatedAt: doc.data().updatedAt?.toDate(),
-      })) as Movie[];
+      return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        const movie = {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate(),
+          updatedAt: data.updatedAt?.toDate(),
+        } as Movie;
+        
+        if (!movie.posterUrl && movie.movieLink) {
+          movie.posterUrl = extractPosterUrlFromMovieLink(movie.movieLink);
+        }
+        
+        return movie;
+      });
     } catch (error) {
       console.error('❌ Error fetching movies:', error);
       if (error instanceof Error) {
@@ -54,12 +81,21 @@ export const movieService = {
       }
       
       const querySnapshot = await getDocs(q);
-      const movies = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate(),
-        updatedAt: doc.data().updatedAt?.toDate(),
-      })) as Movie[];
+      const movies = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        const movie = {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate(),
+          updatedAt: data.updatedAt?.toDate(),
+        } as Movie;
+        
+        if (!movie.posterUrl && movie.movieLink) {
+          movie.posterUrl = extractPosterUrlFromMovieLink(movie.movieLink);
+        }
+        
+        return movie;
+      });
 
       const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
       
@@ -76,12 +112,19 @@ export const movieService = {
       const docSnap = await getDoc(movieDoc);
       
       if (docSnap.exists()) {
-        return {
+        const data = docSnap.data();
+        const movie = {
           id: docSnap.id,
-          ...docSnap.data(),
-          createdAt: docSnap.data().createdAt?.toDate(),
-          updatedAt: docSnap.data().updatedAt?.toDate(),
+          ...data,
+          createdAt: data.createdAt?.toDate(),
+          updatedAt: data.updatedAt?.toDate(),
         } as Movie;
+        
+        if (!movie.posterUrl && movie.movieLink) {
+          movie.posterUrl = extractPosterUrlFromMovieLink(movie.movieLink);
+        }
+        
+        return movie;
       }
       return null;
     } catch (error) {
@@ -189,12 +232,17 @@ export const movieService = {
       const movieMap = new Map<string, Movie>();
       
       [...titleSnapshot.docs, ...directorSnapshot.docs].forEach(doc => {
+        const data = doc.data();
         const movie = {
           id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
+          ...data,
+          createdAt: data.createdAt?.toDate(),
+          updatedAt: data.updatedAt?.toDate(),
         } as Movie;
+        
+        if (!movie.posterUrl && movie.movieLink) {
+          movie.posterUrl = extractPosterUrlFromMovieLink(movie.movieLink);
+        }
         
         if (movie.title.toLowerCase().includes(searchTermLower) ||
             movie.director.toLowerCase().includes(searchTermLower)) {
@@ -219,12 +267,21 @@ export const movieService = {
       );
       const querySnapshot = await getDocs(q);
       
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate(),
-        updatedAt: doc.data().updatedAt?.toDate(),
-      })) as Movie[];
+      return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        const movie = {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate(),
+          updatedAt: data.updatedAt?.toDate(),
+        } as Movie;
+        
+        if (!movie.posterUrl && movie.movieLink) {
+          movie.posterUrl = extractPosterUrlFromMovieLink(movie.movieLink);
+        }
+        
+        return movie;
+      });
     } catch (error) {
       console.error('Error fetching movies by hard drive:', error);
       throw error;

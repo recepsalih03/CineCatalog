@@ -388,11 +388,23 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
                   onChange={(e) => handleChange("audioQuality", e.target.value)}
                 >
                   <option value="" className="bg-gray-800 text-white">Kalite seçin</option>
-                  <option value="Dolby Atmos" className="bg-gray-800 text-white">Dolby Atmos</option>
-                  <option value="DTS-HD" className="bg-gray-800 text-white">DTS-HD Master Audio</option>
-                  <option value="5.1" className="bg-gray-800 text-white">5.1 Surround</option>
-                  <option value="Stereo" className="bg-gray-800 text-white">Stereo</option>
-                  <option value="Mono" className="bg-gray-800 text-white">Mono</option>
+                  <option value="AC3 1.0" className="bg-gray-800 text-white">AC3 1.0</option>
+                  <option value="AC3 2.0" className="bg-gray-800 text-white">AC3 2.0</option>
+                  <option value="AC3 5.1" className="bg-gray-800 text-white">AC3 5.1</option>
+                  <option value="DDP 2.0" className="bg-gray-800 text-white">DDP 2.0</option>
+                  <option value="DDP 5.1" className="bg-gray-800 text-white">DDP 5.1</option>
+                  <option value="DDP Atmos 5.1" className="bg-gray-800 text-white">DDP Atmos 5.1</option>
+                  <option value="DTS 1.0" className="bg-gray-800 text-white">DTS 1.0</option>
+                  <option value="DTS 2.0" className="bg-gray-800 text-white">DTS 2.0</option>
+                  <option value="DTS 5.1" className="bg-gray-800 text-white">DTS 5.1</option>
+                  <option value="DTSES 5.1" className="bg-gray-800 text-white">DTSES 5.1</option>
+                  <option value="DTS-HD MA 1.0" className="bg-gray-800 text-white">DTS-HD MA 1.0</option>
+                  <option value="DTS-HD MA 2.0" className="bg-gray-800 text-white">DTS-HD MA 2.0</option>
+                  <option value="DTS-HD MA 4.0" className="bg-gray-800 text-white">DTS-HD MA 4.0</option>
+                  <option value="DTS-HD MA 5.0" className="bg-gray-800 text-white">DTS-HD MA 5.0</option>
+                  <option value="DTS-HD MA 5.1" className="bg-gray-800 text-white">DTS-HD MA 5.1</option>
+                  <option value="DTS-HD MA 6.1" className="bg-gray-800 text-white">DTS-HD MA 6.1</option>
+                  <option value="DTS-HD MA 7.1" className="bg-gray-800 text-white">DTS-HD MA 7.1</option>
                 </select>
               </div>
             </div>
