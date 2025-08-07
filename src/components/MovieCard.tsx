@@ -13,7 +13,7 @@ interface MovieCardProps {
 
 const MovieCard = memo(function MovieCard({ movie }: MovieCardProps) {
   return (
-    <Card className={`movie-card border-0 relative overflow-hidden ${movie.watched ? 'ring-1 ring-green-400/30' : ''} ${!movie.posterUrl ? 'min-h-48 sm:min-h-56 md:aspect-[2/3]' : ''}`}>
+    <Card className={`movie-card border-0 p-4 relative overflow-hidden ${movie.watched ? 'ring-1 ring-green-400/30' : ''} ${!movie.posterUrl ? 'min-h-40 sm:min-h-80' : ''}`}>
       {movie.watched && (
         <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-emerald-500/5 pointer-events-none" />
       )}
@@ -33,8 +33,8 @@ const MovieCard = memo(function MovieCard({ movie }: MovieCardProps) {
         </div>
       )}
       
-      <CardContent className={`p-3 flex flex-col relative z-10 ${!movie.posterUrl ? 'justify-center h-full' : ''}`}>
-        <div className="flex items-start justify-between mb-2">
+      <CardContent className={`px-5 py-0 flex flex-col relative z-10 ${!movie.posterUrl ? 'justify-center h-full' : ''}`}>
+        <div className="flex items-start justify-between mb-1">
           <div className="flex items-center gap-2">
             <Film className="h-4 w-4 text-[#ff6b6b]" />
             {movie.watched && (
@@ -55,9 +55,9 @@ const MovieCard = memo(function MovieCard({ movie }: MovieCardProps) {
           </Badge>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <div>
-            <h3 className="text-sm font-bold text-foreground line-clamp-2 leading-tight mb-1">
+            <h3 className="text-sm font-bold text-foreground line-clamp-2 leading-tight mb-0.5">
               {movie.movieLink && movie.movieLink.trim() ? (
                 <a 
                   href={movie.movieLink} 
@@ -99,7 +99,7 @@ const MovieCard = memo(function MovieCard({ movie }: MovieCardProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-1 pt-2 border-t border-white/10">
+          <div className="grid grid-cols-2 gap-1 pt-1 border-t border-white/10">
             <div className="flex items-center gap-1">
               <Volume2 className="h-3 w-3 text-[#feca57]" />
               <span className="text-xs text-foreground truncate">
