@@ -31,8 +31,8 @@ export default function HardDriveFilter({ hardDrives, selectedHardDrive, onSelec
     if (!isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
       setDropdownPosition({
-        top: rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX,
+        top: rect.bottom + 8,
+        left: rect.left,
         width: rect.width
       })
     }
@@ -44,8 +44,8 @@ export default function HardDriveFilter({ hardDrives, selectedHardDrive, onSelec
       if (isOpen && buttonRef.current) {
         const rect = buttonRef.current.getBoundingClientRect()
         setDropdownPosition({
-          top: rect.bottom + window.scrollY + 8,
-          left: rect.left + window.scrollX,
+          top: rect.bottom + 8,
+          left: rect.left,
           width: rect.width
         })
       }
