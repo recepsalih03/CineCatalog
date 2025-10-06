@@ -363,12 +363,17 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
                   onChange={(e) => handleChange("videoQuality", e.target.value)}
                 >
                   <option value="" className="bg-gray-800 text-white">Kalite seçin</option>
-                  <option value="4K BD Remux" className="bg-gray-800 text-white">4K BD Remux</option>
-                  <option value="4K" className="bg-gray-800 text-white">4K</option>
+                  <option value="4K Bluray Disk HDR" className="bg-gray-800 text-white">4K Bluray Disk HDR</option>
+                  <option value="4K Bluray Disk SDR" className="bg-gray-800 text-white">4K Bluray Disk SDR</option>
+                  <option value="4K BD Remux HDR" className="bg-gray-800 text-white">4K BD Remux HDR</option>
+                  <option value="4K BD Remux SDR" className="bg-gray-800 text-white">4K BD Remux SDR</option>
+                  <option value="4K Remux HDR" className="bg-gray-800 text-white">4K Remux HDR</option>
+                  <option value="4K Remux SDR" className="bg-gray-800 text-white">4K Remux SDR</option>
                   <option value="BD Remux" className="bg-gray-800 text-white">BD Remux</option>
                   <option value="Remux" className="bg-gray-800 text-white">Remux</option>
                   <option value="Blu-ray Disk" className="bg-gray-800 text-white">Blu-ray Disk</option>
-                  <option value="WEB-DL" className="bg-gray-800 text-white">WEB-DL</option>
+                  <option value="WEB-DL HDR" className="bg-gray-800 text-white">WEB-DL HDR</option>
+                  <option value="WEB-DL SDR" className="bg-gray-800 text-white">WEB-DL SDR</option>
                   <option value="1080p" className="bg-gray-800 text-white">1080p</option>
                   <option value="810p" className="bg-gray-800 text-white">810p</option>
                   <option value="720p" className="bg-gray-800 text-white">720p</option>
@@ -397,7 +402,8 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
                   <option value="DTS 1.0" className="bg-gray-800 text-white">DTS 1.0</option>
                   <option value="DTS 2.0" className="bg-gray-800 text-white">DTS 2.0</option>
                   <option value="DTS 5.1" className="bg-gray-800 text-white">DTS 5.1</option>
-                  <option value="DTSES 5.1" className="bg-gray-800 text-white">DTSES 5.1</option>
+                  <option value="DTSES 5.1" className="bg-gray-800 text-white">DTS-ES 5.1</option>
+                  <option value="DTSES 6.1" className="bg-gray-800 text-white">DTS-ES 6.1</option>
                   <option value="DTS-HD MA 1.0" className="bg-gray-800 text-white">DTS-HD MA 1.0</option>
                   <option value="DTS-HD MA 2.0" className="bg-gray-800 text-white">DTS-HD MA 2.0</option>
                   <option value="DTS-HD MA 4.0" className="bg-gray-800 text-white">DTS-HD MA 4.0</option>
@@ -405,8 +411,8 @@ export default function MovieForm({ movie, onSubmit, onCancel, title, existingHa
                   <option value="DTS-HD MA 5.1" className="bg-gray-800 text-white">DTS-HD MA 5.1</option>
                   <option value="DTS-HD MA 6.1" className="bg-gray-800 text-white">DTS-HD MA 6.1</option>
                   <option value="DTS-HD MA 7.1" className="bg-gray-800 text-white">DTS-HD MA 7.1</option>
-                  <option value="TRUE HD 2.0" className="bg-gray-800 text-white">TRUE HD 2.0</option>
-                  <option value="TRUE HD 5.1" className="bg-gray-800 text-white">TRUE HD 5.1</option>
+                  <option value="TRUE HD 2.0" className="bg-gray-800 text-white">True HD 2.0</option>
+                  <option value="TRUE HD 5.1" className="bg-gray-800 text-white">True HD 5.1</option>
                   <option value="TRUE HD Atmos 7.1" className="bg-gray-800 text-white">TRUE HD Atmos 7.1</option>
                   <option value="LPCM 1.0" className="bg-gray-800 text-white">LPCM 1.0</option>
                   <option value="LPCM 2.0" className="bg-gray-800 text-white">LPCM 2.0</option>
