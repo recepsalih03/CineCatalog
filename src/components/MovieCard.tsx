@@ -11,6 +11,14 @@ interface MovieCardProps {
   movie: Movie
 }
 
+const formatAudioQuality = (quality: string | undefined): string => {
+  if (!quality) return "-"
+
+  return quality
+    .replace(/TRUE HD/gi, "TrueHD")
+    .replace(/TRUEHD/gi, "TrueHD")
+}
+
 const MovieCard = memo(function MovieCard({ movie }: MovieCardProps) {
   return (
     <Card className={`movie-card border-0 p-4 relative overflow-hidden ${movie.watched ? 'ring-1 ring-green-400/30' : ''} ${!movie.posterUrl ? 'min-h-40 sm:min-h-80' : ''}`}>
@@ -103,7 +111,7 @@ const MovieCard = memo(function MovieCard({ movie }: MovieCardProps) {
             <div className="flex items-center gap-1">
               <Volume2 className="h-3 w-3 text-[#feca57]" />
               <span className="text-xs text-foreground truncate">
-                {movie.audioQuality || "-"}
+                {formatAudioQuality(movie.audioQuality)}
               </span>
             </div>
             
