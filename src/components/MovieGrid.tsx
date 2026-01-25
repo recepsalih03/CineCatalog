@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import type { Movie } from "@/types/movie"
 import MovieCard from "@/components/MovieCard"
@@ -14,14 +14,16 @@ interface MovieGridProps {
 export default function MovieGrid({ initialMovies }: MovieGridProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [currentPage, setCurrentPage] = useState(() => {
-    const pageParam = searchParams.get('page')
-    return pageParam ? parseInt(pageParam, 10) : 1
-  })
   const [itemsPerPage] = useState(32)
+
+  const pageFromUrl = searchParams.get('page')
+  const currentPage = pageFromUrl ? parseInt(pageFromUrl, 10) : 1
 
   const searchQuery = searchParams.get('search') || ""
   const selectedHardDrive = searchParams.get('hardDrive') || ""
+
+  const prevSearchQuery = useRef(searchQuery)
+  const prevHardDrive = useRef(selectedHardDrive)
 
   const filteredMovies = useMemo(() => {
     let filtered = initialMovies
@@ -44,15 +46,31 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
   }, [initialMovies, searchQuery, selectedHardDrive])
 
   useEffect(() => {
-    setCurrentPage(1)
-  }, [searchQuery, selectedHardDrive])
-  
+    if (prevSearchQuery.current !== searchQuery || prevHardDrive.current !== selectedHardDrive) {
+      prevSearchQuery.current = searchQuery
+      prevHardDrive.current = selectedHardDrive
+      if (currentPage !== 1) {
+        const params = new URLSearchParams(searchParams.toString())
+        params.delete('page')
+        const queryString = params.toString()
+        router.replace(queryString ? `/?${queryString}` : '/', { scroll: false })
+      }
+    }
+  }, [searchQuery, selectedHardDrive, currentPage, searchParams, router])
+
   useEffect(() => {
     const newTotalPages = Math.ceil(filteredMovies.length / itemsPerPage)
     if (currentPage > newTotalPages && newTotalPages > 0) {
-      setCurrentPage(newTotalPages)
+      const params = new URLSearchParams(searchParams.toString())
+      if (newTotalPages > 1) {
+        params.set('page', newTotalPages.toString())
+      } else {
+        params.delete('page')
+      }
+      const queryString = params.toString()
+      router.replace(queryString ? `/?${queryString}` : '/', { scroll: false })
     }
-  }, [filteredMovies.length, itemsPerPage, currentPage])
+  }, [filteredMovies.length, itemsPerPage, currentPage, searchParams, router])
 
   const paginatedMovies = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
@@ -66,7 +84,6 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
 
   const handlePageChange = (page: number, maintainScroll = true) => {
     const currentScrollY = window.scrollY;
-    setCurrentPage(page);
 
     const params = new URLSearchParams(searchParams.toString())
     if (page > 1) {

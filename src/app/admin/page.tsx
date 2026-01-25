@@ -78,7 +78,7 @@ export default function AdminPanel() {
 
             if (debouncedSearchQuery) {
               const searchLower = debouncedSearchQuery.toLowerCase();
-              filtered = filtered.filter(movie => 
+              filtered = filtered.filter(movie =>
                 movie.title.toLowerCase().includes(searchLower) ||
                 movie.director.toLowerCase().includes(searchLower) ||
                 movie.hardDrive.toLowerCase().includes(searchLower)
@@ -135,13 +135,24 @@ export default function AdminPanel() {
 
       setTotalMovies(filtered.length);
       setFilteredMovies(filtered);
-      setCurrentPage(1);
+
+      const newTotalPages = Math.ceil(filtered.length / itemsPerPage);
+      setCurrentPage(prev => {
+        if (prev > newTotalPages && newTotalPages > 0) {
+          return newTotalPages;
+        }
+        return prev;
+      });
     } catch (error) {
       console.error('Filtering error:', error);
       setFilteredMovies(movies);
       setTotalMovies(movies.length);
     }
-  }, [movies, debouncedSearchQuery, selectedHardDrive, sortConfig])
+  }, [movies, debouncedSearchQuery, selectedHardDrive, sortConfig, itemsPerPage])
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchQuery, selectedHardDrive, sortConfig]);
 
   useEffect(() => {
     filterAndSortMovies();
