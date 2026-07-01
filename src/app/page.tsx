@@ -142,7 +142,7 @@ export default function Home() {
         </Suspense>
 
         <Suspense fallback={
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="animate-pulse border-0 rounded-lg overflow-hidden">
                 <div className="w-full aspect-[2/3] bg-gray-200 dark:bg-gray-700 rounded-t-lg"></div>
