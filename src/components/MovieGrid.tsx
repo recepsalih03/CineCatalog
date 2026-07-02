@@ -140,6 +140,87 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
     )
   }
 
+  const paginationControls = totalPages > 1 ? (
+    <div className="flex flex-col gap-3 px-2 sm:px-4">
+      <div className="text-xs sm:text-sm text-muted-foreground text-center">
+        Sayfa {currentPage} / {totalPages} - Toplam {filteredMovies.length} film
+      </div>
+      <div className="flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={goToFirstPage}
+          disabled={currentPage === 1}
+          className="btn-outline gap-1 text-xs px-2 sm:px-3"
+        >
+          <span className="hidden sm:inline">⏮️ İlk</span>
+          <span className="sm:hidden">⏮️</span>
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="btn-outline gap-1 text-xs px-2 sm:px-3"
+        >
+          <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+          <span className="hidden sm:inline">Önceki</span>
+        </Button>
+
+        <div className="flex items-center gap-1">
+          {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+            let pageNum;
+            const maxPages = 3;
+            if (totalPages <= maxPages) {
+              pageNum = i + 1;
+            } else if (currentPage <= Math.floor(maxPages/2) + 1) {
+              pageNum = i + 1;
+            } else if (currentPage >= totalPages - Math.floor(maxPages/2)) {
+              pageNum = totalPages - maxPages + 1 + i;
+            } else {
+              pageNum = currentPage - Math.floor(maxPages/2) + i;
+            }
+
+            return (
+              <Button
+                key={pageNum}
+                variant={currentPage === pageNum ? "default" : "outline"}
+                size="sm"
+                onClick={() => handlePageChange(pageNum)}
+                className={`${currentPage === pageNum ? "btn-primary" : "btn-outline"} text-xs px-2 sm:px-3 min-w-[32px] sm:min-w-[36px]`}
+              >
+                {pageNum}
+              </Button>
+            );
+          })}
+        </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="btn-outline gap-1 text-xs px-2 sm:px-3"
+        >
+          <span className="hidden sm:inline">Sonraki</span>
+          <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={goToLastPage}
+          disabled={currentPage === totalPages}
+          className="btn-outline gap-1 text-xs px-2 sm:px-3"
+        >
+          <span className="hidden sm:inline">Son ⏭️</span>
+          <span className="sm:hidden">⏭️</span>
+        </Button>
+      </div>
+    </div>
+  ) : null
+
   return (
     <>
       <div className="mb-6 text-center">
@@ -156,92 +237,15 @@ export default function MovieGrid({ initialMovies }: MovieGridProps) {
         </p>
       </div>
 
+      {paginationControls && <div className="mb-6">{paginationControls}</div>}
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {paginatedMovies.map((movie) => (
           <MovieCard key={movie.id} movie={movie} />
         ))}
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex flex-col gap-3 mt-6 px-2 sm:px-4">
-          <div className="text-xs sm:text-sm text-muted-foreground text-center">
-            Sayfa {currentPage} / {totalPages} - Toplam {filteredMovies.length} film
-          </div>
-          <div className="flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToFirstPage}
-              disabled={currentPage === 1}
-              className="btn-outline gap-1 text-xs px-2 sm:px-3"
-            >
-              <span className="hidden sm:inline">⏮️ İlk</span>
-              <span className="sm:hidden">⏮️</span>
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="btn-outline gap-1 text-xs px-2 sm:px-3"
-            >
-              <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Önceki</span>
-            </Button>
-            
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
-                let pageNum;
-                const maxPages = 3;
-                if (totalPages <= maxPages) {
-                  pageNum = i + 1;
-                } else if (currentPage <= Math.floor(maxPages/2) + 1) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - Math.floor(maxPages/2)) {
-                  pageNum = totalPages - maxPages + 1 + i;
-                } else {
-                  pageNum = currentPage - Math.floor(maxPages/2) + i;
-                }
-                
-                return (
-                  <Button
-                    key={pageNum}
-                    variant={currentPage === pageNum ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handlePageChange(pageNum)}
-                    className={`${currentPage === pageNum ? "btn-primary" : "btn-outline"} text-xs px-2 sm:px-3 min-w-[32px] sm:min-w-[36px]`}
-                  >
-                    {pageNum}
-                  </Button>
-                );
-              })}
-            </div>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="btn-outline gap-1 text-xs px-2 sm:px-3"
-            >
-              <span className="hidden sm:inline">Sonraki</span>
-              <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToLastPage}
-              disabled={currentPage === totalPages}
-              className="btn-outline gap-1 text-xs px-2 sm:px-3"
-            >
-              <span className="hidden sm:inline">Son ⏭️</span>
-              <span className="sm:hidden">⏭️</span>
-            </Button>
-          </div>
-        </div>
-      )}
+      {paginationControls && <div className="mt-6">{paginationControls}</div>}
     </>
   )
 }
